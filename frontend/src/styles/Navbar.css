@@ -3,8 +3,10 @@
   background-color: #333; /* Dark background */
   color: #fff; /* White text */
   padding: 10px 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add subtle shadow for better visibility */
 }
 
+/* Navbar container layout */
 .navbar-container {
   display: flex;
   justify-content: space-between;
@@ -17,6 +19,11 @@
   font-weight: bold;
   text-decoration: none;
   color: #fff;
+  transition: color 0.3s;
+}
+
+.navbar-logo:hover {
+  color: #ff9800; /* Highlight color for logo on hover */
 }
 
 /* Menu styling */
@@ -25,19 +32,38 @@
   display: flex;
   margin: 0;
   padding: 0;
+  gap: 20px; /* Spacing between menu items */
 }
 
 .navbar-menu li {
-  margin: 0 15px;
+  margin: 0;
 }
 
+/* Link styling */
 .navbar-link {
   text-decoration: none;
   color: #fff;
   font-size: 18px;
-  transition: color 0.3s;
+  padding: 5px 10px;
+  border-radius: 4px;
+  transition: background-color 0.3s, color 0.3s;
 }
 
 .navbar-link:hover {
-  color: #00bcd4; /* Highlight color on hover */
+  background-color: #00bcd4; /* Highlight background on hover */
+  color: #fff; /* Keep text white on hover */
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+  .navbar-menu {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px; /* Reduced gap for stacked items */
+  }
+
+  .navbar-container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }

@@ -1,0 +1,62 @@
+.players-stats-container {
+  max-width: 1000px;
+  margin: 50px auto;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+/* Search bar styling */
+.search-bar {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.search-bar input {
+  width: 60%;
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* Table styling */
+.players-stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.players-stats-table th, .players-stats-table td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: center;
+}
+
+.players-stats-table th {
+  background-color: #007bff;
+  color: white;
+}
+
+.players-stats-table tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+.players-stats-table tr:hover {
+  background-color: #e0f7fa;
+}
+
+/* Empty state message */
+p {
+  text-align: center;
+  font-size: 16px;
+  color: #777;
+}

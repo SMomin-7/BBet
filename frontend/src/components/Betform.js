@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import '../styles/Betform.css'; // Ensure styles exist
 import ConfirmationModel from './ConfirmationModel'; // Correct import for ConfirmationModel
 
-function BetForm({ game, onClose }) {
+function BetForm({ game, onPlaceBet, onClose }) {
   // State for the betting amount and selected team
   const [betAmount, setBetAmount] = useState('');
   const [selectedTeam, setSelectedTeam] = useState('');
@@ -25,8 +25,8 @@ function BetForm({ game, onClose }) {
 
   // Handle confirming the bet
   const handleConfirm = () => {
-    console.log(`Bet placed on ${selectedTeam} with amount $${betAmount}`); // Mock submission
-    alert(`Bet placed on ${selectedTeam} with amount $${betAmount}`);
+    // Add the bet to the history and close the form
+    onPlaceBet(game, selectedTeam, parseFloat(betAmount));
     setShowModal(false); // Close the modal
     onClose(); // Close the form
   };

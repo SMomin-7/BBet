@@ -31,6 +31,7 @@ CREATE TABLE USER (
     DOB DATE,
     email VARCHAR(255) UNIQUE NOT NULL,
     name VARCHAR(100),
+    password VARCHAR(100)
     deposit DECIMAL(10, 2),
     balance DECIMAL(10, 2),
     Ranking INT,
@@ -40,6 +41,8 @@ CREATE TABLE USER (
     FOREIGN KEY (client_id) REFERENCES CLIENT(client_id),
     FOREIGN KEY (Ranking) REFERENCES LEADERBOARD(Ranking)
 );
+ALTER TABLE USER ADD COLUMN password VARCHAR(255) NOT NULL AFTER email;
+
 
 -- Updated table name from MATCH to GAME
 CREATE TABLE GAME (

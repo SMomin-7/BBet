@@ -21,6 +21,16 @@ function Navbar() {
             </Link>
           </li>
           <li>
+            <Link to="/matches" className="navbar-link">
+              View Matches
+            </Link>
+          </li>
+          <li>
+            <Link to="/players-statistics" className="navbar-link">
+              Players & Statistics
+            </Link>
+          </li>
+          <li>
             <Link to="/login" className="navbar-link">
               Login
             </Link>
