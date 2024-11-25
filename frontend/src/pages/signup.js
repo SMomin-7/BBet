@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom'; // Navigation between pages
+import { Link, useNavigate } from 'react-router-dom'; // For navigation
 import axios from 'axios'; // For API calls
 import '../styles/signup.css'; // CSS for styling
 
 function Signup() {
-  // State for form inputs
+  const navigate = useNavigate(); // For programmatic navigation
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -14,55 +14,47 @@ function Signup() {
     deposit: '',
   });
 
-  // State for displaying messages
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [success, setSuccess] = useState(false); // Track success state
 
-  // Handle changes in form fields
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    setSuccess('');
+    setSuccess(false);
 
-    // Destructure form data for easy validation
     const { name, email, password, confirmPassword, dob, deposit } = formData;
 
-    // Validate required fields
     if (!name || !email || !password || !confirmPassword || !dob || !deposit) {
       setError('All fields are required.');
       return;
     }
 
-    // Validate password match
     if (password !== confirmPassword) {
       setError('Passwords do not match.');
       return;
     }
 
-    // Validate deposit value
     if (isNaN(deposit) || parseFloat(deposit) <= 0) {
       setError('Deposit must be a valid positive number.');
       return;
     }
 
     try {
-      // Submit form data to backend
-      const response = await axios.post('http://localhost:5000/api/auth/signup', {
+      // eslint-disable-next-line no-unused-vars
+      const response = await axios.post('http://127.0.0.1:8000/api/signup/', {
         name,
         email,
         password,
         dob,
-        deposit: parseFloat(deposit), // Convert deposit to number
+        deposit: parseFloat(deposit), // Convert deposit to a number
       });
 
-      // Handle success
-      setSuccess(response.data.message);
+      setSuccess(true); // Indicate success
       setFormData({
         name: '',
         email: '',
@@ -72,16 +64,29 @@ function Signup() {
         deposit: '',
       }); // Reset form fields
     } catch (err) {
-      // Handle errors from backend
       setError(err.response?.data?.error || 'Something went wrong.');
     }
   };
+
+  if (success) {
+    return (
+      <div className="signup-container">
+        <h1>Signup Successful!</h1>
+        <p>Your account has been created. You can now log in.</p>
+        <button
+          className="login-button"
+          onClick={() => navigate('/login')} // Redirect to login page
+        >
+          Go to Login
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="signup-container">
       <h1>Signup</h1>
       {error && <p className="error-message">{error}</p>}
-      {success && <p className="success-message">{success}</p>}
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label htmlFor="name">Name:</label>
