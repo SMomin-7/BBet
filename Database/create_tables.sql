@@ -1,4 +1,5 @@
--- Create the database
+-- Drop and recreate the database
+
 CREATE DATABASE IF NOT EXISTS bettingApp;
 
 -- Use the newly created database
@@ -6,8 +7,6 @@ USE bettingApp;
 
 -- Disable foreign key checks temporarily
 SET FOREIGN_KEY_CHECKS = 0;
-
-
 
 -- Create tables in the correct order
 CREATE TABLE ADMIN (
@@ -31,7 +30,7 @@ CREATE TABLE USER (
     DOB DATE,
     email VARCHAR(255) UNIQUE NOT NULL,
     name VARCHAR(100),
-    password VARCHAR(100)
+    password VARCHAR(255) NOT NULL,
     deposit DECIMAL(10, 2),
     balance DECIMAL(10, 2),
     Ranking INT,
@@ -41,10 +40,7 @@ CREATE TABLE USER (
     FOREIGN KEY (client_id) REFERENCES CLIENT(client_id),
     FOREIGN KEY (Ranking) REFERENCES LEADERBOARD(Ranking)
 );
-ALTER TABLE USER ADD COLUMN password VARCHAR(255) NOT NULL AFTER email;
 
-
--- Updated table name from MATCH to GAME
 CREATE TABLE GAME (
     game_Id INT PRIMARY KEY,
     date DATE,
@@ -56,7 +52,7 @@ CREATE TABLE ODDS (
     Odds_Id INT PRIMARY KEY,
     Team1 VARCHAR(100),
     Team2 VARCHAR(100),
-    game_id INT, -- Updated reference to GAME
+    game_id INT,
     latest DECIMAL(5, 2),
     FOREIGN KEY (game_id) REFERENCES GAME(game_Id)
 );
@@ -67,7 +63,7 @@ CREATE TABLE BET (
     User_Id INT,
     time TIMESTAMP,
     payout DECIMAL(10, 2),
-    game_id INT, -- Updated reference to GAME
+    game_id INT,
     result VARCHAR(10),
     PRIMARY KEY (User_Id, Odds_Id, bet_Id),
     FOREIGN KEY (User_Id) REFERENCES USER(User_Id),
