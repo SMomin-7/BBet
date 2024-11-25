@@ -1,16 +1,34 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import '../styles/Dashboard.css'; // Ensure this file exists for styling
 import Betform from '../components/Betform'; // Correct import for Betform.js
 
 function Dashboard() {
-  const [balance, setBalance] = useState(500.0); // User's balance
+  const [balance, setBalance] = useState(0.0); // User's balance
   const [games, setGames] = useState([]); // Games/matches state
   const [loading, setLoading] = useState(true); // Loading state for matches
   const [selectedGame, setSelectedGame] = useState(null); // Game selected for betting
   const [betHistory, setBetHistory] = useState([]); // User's bet history
 
-  // Simulate fetching data from backend
+  // Fetch user data (balance and bet history) on component mount
   useEffect(() => {
+    const fetchUserData = async () => {
+      const user = JSON.parse(localStorage.getItem('user')); // Get logged-in user
+      if (!user) {
+        console.error('No user found in localStorage.');
+        return;
+      }
+      try {
+        const response = await axios.get('http://127.0.0.1:8000/api/get-user-data/', {
+          params: { user_id: user.id },
+        });
+        setBalance(response.data.balance); // Set user balance
+        setBetHistory(response.data.bet_history); // Set bet history
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+
     const fetchGames = async () => {
       setLoading(true);
       setTimeout(() => {
@@ -19,38 +37,47 @@ function Dashboard() {
           { id: 2, team1: 'Team C', team2: 'Team D', odds: { team1: 1.8, team2: 1.9 } },
           { id: 3, team1: 'Team E', team2: 'Team F', odds: { team1: 2.0, team2: 1.6 } },
         ];
-        setGames(mockGames);
+        setGames(mockGames); // Set mock games (replace with API call if needed)
         setLoading(false);
       }, 1000);
     };
 
+    fetchUserData();
     fetchGames();
   }, []);
 
   // Handle placing a bet
-  const handlePlaceBet = (game, selectedTeam, betAmount) => {
-    const oddsKey = selectedTeam === game.team1 ? 'team1' : 'team2'; // Map selected team to odds key
-    const odds = game.odds[oddsKey]; // Retrieve correct odds
+  const handlePlaceBet = async (game, selectedTeam, betAmount) => {
+    const user = JSON.parse(localStorage.getItem('user')); // Get logged-in user
+    const odds = selectedTeam === game.team1 ? game.odds.team1 : game.odds.team2;
 
-    if (!odds) {
-      console.error('Odds not found for the selected team.');
-      return;
+    try {
+      const response = await axios.post('http://127.0.0.1:8000/api/place-bet/', {
+        user_id: user.id,
+        game: `${game.team1} vs ${game.team2}`,
+        selected_team: selectedTeam,
+        bet_amount: betAmount,
+        payout: betAmount * odds,
+      });
+
+      // Update state after successful bet placement
+      setBalance((prevBalance) => prevBalance - betAmount);
+      setBetHistory((prevHistory) => [
+        ...prevHistory,
+        {
+          game: `${game.team1} vs ${game.team2}`,
+          selected_team: selectedTeam,
+          bet_amount: betAmount,
+          payout: betAmount * odds,
+          result: 'Pending',
+        },
+      ]);
+
+      alert(response.data.message); // Notify user
+      setSelectedGame(null); // Close the bet form
+    } catch (error) {
+      console.error('Error placing bet:', error);
     }
-
-    const payout = betAmount * odds; // Calculate payout
-
-    const newBet = {
-      id: betHistory.length + 1,
-      game: `${game.team1} vs ${game.team2}`,
-      selectedTeam,
-      betAmount: parseFloat(betAmount).toFixed(2), // Ensure bet amount is properly formatted
-      payout: payout.toFixed(2), // Format payout to 2 decimals
-      result: 'Pending',
-    };
-
-    setBetHistory([...betHistory, newBet]); // Update bet history
-    setBalance(balance - betAmount); // Deduct bet amount from balance
-    setSelectedGame(null); // Close the bet form
   };
 
   return (
@@ -112,12 +139,12 @@ function Dashboard() {
               </tr>
             </thead>
             <tbody>
-              {betHistory.map((bet) => (
-                <tr key={bet.id}>
+              {betHistory.map((bet, index) => (
+                <tr key={index}>
                   <td>{bet.game}</td>
-                  <td>{bet.selectedTeam}</td>
-                  <td>${bet.betAmount}</td>
-                  <td>${bet.payout}</td>
+                  <td>{bet.selected_team}</td>
+                  <td>${bet.bet_amount.toFixed(2)}</td>
+                  <td>${bet.payout.toFixed(2)}</td>
                   <td
                     className={bet.result === 'Won' ? 'result-won' : 'result-pending'}
                   >

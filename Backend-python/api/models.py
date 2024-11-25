@@ -15,3 +15,15 @@ class CustomUser(models.Model):
     def __str__(self):
         return self.email
 
+class Bet(models.Model):
+    bet_id = models.AutoField(primary_key=True)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    game = models.CharField(max_length=255)  # e.g., "Team A vs Team B"
+    selected_team = models.CharField(max_length=100)  # The user's chosen team
+    bet_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    payout = models.DecimalField(max_digits=10, decimal_places=2)
+    result = models.CharField(max_length=50, default="Pending")  # "Won", "Lost", or "Pending"
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.name} - {self.game} - {self.selected_team}"

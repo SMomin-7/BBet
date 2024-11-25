@@ -11,6 +11,14 @@ SELECT email, password FROM api_customuser;
 
 
 
+DESCRIBE api_bet;
+SELECT * FROM api_bet;
+
+
+
+
+
+
 
 
 
