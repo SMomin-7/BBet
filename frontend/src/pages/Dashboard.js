@@ -25,7 +25,7 @@ function Dashboard() {
         setBalance(response.data.balance); // Set user balance
         setBetHistory(response.data.bet_history); // Set bet history
       } catch (error) {
-        console.error('Error fetching user data:', error);
+        console.error('Error fetching user data:', error.response?.data?.error || error.message);
       }
     };
 
@@ -52,23 +52,23 @@ function Dashboard() {
     const odds = selectedTeam === game.team1 ? game.odds.team1 : game.odds.team2;
 
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/place-bet/', {
+      const response = await axios.post('http://127.0.0.1:8000/api/update-balance-and-place-bet/', {
         user_id: user.id,
         game: `${game.team1} vs ${game.team2}`,
         selected_team: selectedTeam,
-        bet_amount: betAmount,
-        payout: betAmount * odds,
+        bet_amount: parseFloat(betAmount),
+        payout: parseFloat(betAmount * odds),
       });
 
       // Update state after successful bet placement
-      setBalance((prevBalance) => prevBalance - betAmount);
+      setBalance(response.data.balance); // Update balance from API response
       setBetHistory((prevHistory) => [
         ...prevHistory,
         {
           game: `${game.team1} vs ${game.team2}`,
           selected_team: selectedTeam,
-          bet_amount: betAmount,
-          payout: betAmount * odds,
+          bet_amount: parseFloat(betAmount).toFixed(2),
+          payout: (betAmount * odds).toFixed(2),
           result: 'Pending',
         },
       ]);
@@ -76,7 +76,7 @@ function Dashboard() {
       alert(response.data.message); // Notify user
       setSelectedGame(null); // Close the bet form
     } catch (error) {
-      console.error('Error placing bet:', error);
+      console.error('Error placing bet:', error.response?.data?.error || error.message);
     }
   };
 
@@ -86,7 +86,7 @@ function Dashboard() {
 
       {/* Display User Balance */}
       <div className="user-balance">
-        <h2>Your Balance: ${balance.toFixed(2)}</h2>
+        <h2>Your Balance: ${parseFloat(balance).toFixed(2)}</h2>
       </div>
 
       {/* Display Games/Matches */}
@@ -143,8 +143,8 @@ function Dashboard() {
                 <tr key={index}>
                   <td>{bet.game}</td>
                   <td>{bet.selected_team}</td>
-                  <td>${bet.bet_amount.toFixed(2)}</td>
-                  <td>${bet.payout.toFixed(2)}</td>
+                  <td>${bet.bet_amount}</td>
+                  <td>${bet.payout}</td>
                   <td
                     className={bet.result === 'Won' ? 'result-won' : 'result-pending'}
                   >
