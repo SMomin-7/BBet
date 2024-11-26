@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import '../styles/Betform.css'; // Ensure styles exist
 import ConfirmationModel from './ConfirmationModel'; // Correct import for ConfirmationModel
 
-function BetForm({ game, onPlaceBet, onClose }) {
-  // State for the betting amount and selected team
+function BetForm({ game, onPlaceBet, onClose, userBalance }) {
   const [betAmount, setBetAmount] = useState('');
   const [selectedTeam, setSelectedTeam] = useState('');
   const [error, setError] = useState('');
@@ -14,8 +13,19 @@ function BetForm({ game, onPlaceBet, onClose }) {
     e.preventDefault();
     setError(''); // Clear previous errors
 
+    // Validation
     if (!selectedTeam || !betAmount) {
       setError('All fields are required.');
+      return;
+    }
+
+    if (betAmount <= 0) {
+      setError('Bet amount must be greater than zero.');
+      return;
+    }
+
+    if (betAmount > userBalance) {
+      setError('Insufficient balance.');
       return;
     }
 
@@ -25,7 +35,7 @@ function BetForm({ game, onPlaceBet, onClose }) {
 
   // Handle confirming the bet
   const handleConfirm = () => {
-    // Add the bet to the history and close the form
+    // Pass the bet details to the parent handler
     onPlaceBet(game, selectedTeam, parseFloat(betAmount));
     setShowModal(false); // Close the modal
     onClose(); // Close the form
@@ -63,7 +73,9 @@ function BetForm({ game, onPlaceBet, onClose }) {
                 placeholder="Enter your bet amount"
               />
             </div>
-            <button type="submit" className="submit-button">Place Bet</button>
+            <button type="submit" className="submit-button">
+              Place Bet
+            </button>
             <button type="button" className="cancel-button" onClick={onClose}>
               Cancel
             </button>

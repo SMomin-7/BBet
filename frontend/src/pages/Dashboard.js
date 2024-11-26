@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import '../styles/Dashboard.css'; // Ensure this file exists for styling
-import Betform from '../components/Betform'; // Correct import for Betform.js
+import '../styles/Dashboard.css';
+import Betform from '../components/Betform';
 
 function Dashboard() {
-  const [balance, setBalance] = useState(0.0); // User's balance
-  const [games, setGames] = useState([]); // Games/matches state
-  const [loading, setLoading] = useState(true); // Loading state for matches
-  const [selectedGame, setSelectedGame] = useState(null); // Game selected for betting
-  const [betHistory, setBetHistory] = useState([]); // User's bet history
+  const [balance, setBalance] = useState(0.0);
+  const [games, setGames] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedGame, setSelectedGame] = useState(null);
+  const [betHistory, setBetHistory] = useState([]);
 
   // Fetch user data (balance and bet history) on component mount
   useEffect(() => {
     const fetchUserData = async () => {
-      const user = JSON.parse(localStorage.getItem('user')); // Get logged-in user
+      const user = JSON.parse(localStorage.getItem('user'));
       if (!user) {
         console.error('No user found in localStorage.');
         return;
@@ -37,7 +37,7 @@ function Dashboard() {
           { id: 2, team1: 'Team C', team2: 'Team D', odds: { team1: 1.8, team2: 1.9 } },
           { id: 3, team1: 'Team E', team2: 'Team F', odds: { team1: 2.0, team2: 1.6 } },
         ];
-        setGames(mockGames); // Set mock games (replace with API call if needed)
+        setGames(mockGames);
         setLoading(false);
       }, 1000);
     };
@@ -48,16 +48,14 @@ function Dashboard() {
 
   // Handle placing a bet
   const handlePlaceBet = async (game, selectedTeam, betAmount) => {
-    const user = JSON.parse(localStorage.getItem('user')); // Get logged-in user
+    const user = JSON.parse(localStorage.getItem('user'));
     const odds = selectedTeam === game.team1 ? game.odds.team1 : game.odds.team2;
 
-    // Validation: Ensure bet amount is greater than zero
     if (betAmount <= 0) {
       alert('Bet amount must be greater than zero.');
       return;
     }
 
-    // Validation: Ensure sufficient balance
     if (betAmount > balance) {
       alert('Insufficient balance.');
       return;
@@ -72,8 +70,8 @@ function Dashboard() {
         payout: parseFloat(betAmount * odds),
       });
 
-      // Update state after successful bet placement
-      setBalance(response.data.balance); // Update balance from API response
+      // Update balance and bet history
+      setBalance(response.data.balance);
       setBetHistory((prevHistory) => [
         ...prevHistory,
         {
@@ -85,8 +83,8 @@ function Dashboard() {
         },
       ]);
 
-      alert(response.data.message); // Notify user
-      setSelectedGame(null); // Close the bet form
+      alert(response.data.message);
+      setSelectedGame(null);
     } catch (error) {
       console.error('Error placing bet:', error.response?.data?.error || error.message);
     }
@@ -95,13 +93,9 @@ function Dashboard() {
   return (
     <div className="dashboard-container">
       <h1>Dashboard</h1>
-
-      {/* Display User Balance */}
       <div className="user-balance">
         <h2>Your Balance: ${parseFloat(balance).toFixed(2)}</h2>
       </div>
-
-      {/* Display Games/Matches */}
       <div className="games-list">
         <h2>Available Matches</h2>
         {loading ? (
@@ -118,7 +112,7 @@ function Dashboard() {
               </p>
               <button
                 className="bet-button"
-                onClick={() => setSelectedGame(game)} // Set the selected game for betting
+                onClick={() => setSelectedGame(game)}
               >
                 Place Bet
               </button>
@@ -126,17 +120,14 @@ function Dashboard() {
           ))
         )}
       </div>
-
-      {/* Display Betform when a game is selected */}
       {selectedGame && (
         <Betform
           game={selectedGame}
           onPlaceBet={handlePlaceBet}
-          onClose={() => setSelectedGame(null)} // Close the form
+          onClose={() => setSelectedGame(null)}
+          userBalance={balance} // Pass balance to Betform
         />
       )}
-
-      {/* Display User Bet History */}
       <div className="bet-history">
         <h2>Your Bets</h2>
         {betHistory.length > 0 ? (
@@ -157,11 +148,7 @@ function Dashboard() {
                   <td>{bet.selected_team}</td>
                   <td>${bet.bet_amount}</td>
                   <td>${bet.payout}</td>
-                  <td
-                    className={bet.result === 'Won' ? 'result-won' : 'result-pending'}
-                  >
-                    {bet.result}
-                  </td>
+                  <td>{bet.result}</td>
                 </tr>
               ))}
             </tbody>
