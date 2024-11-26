@@ -1,0 +1,42 @@
+.teams-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  text-align: center;
+}
+
+.teams-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.teams-table th,
+.teams-table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: center;
+}
+
+.teams-table th {
+  background-color: #f4f4f4;
+  font-weight: bold;
+}
+
+.teams-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.teams-table tr:hover {
+  background-color: #f1f1f1;
+}
+
+.teams-table td {
+  font-size: 14px;
+}
+
+h1 {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #333;
+}

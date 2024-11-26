@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard';
 import Matches from './pages/Matches';
 import PlayersStatistics from './pages/PlayersStatistics';
 import Leaderboard from './pages/Leaderboard';
+import Teams from './pages/Teams';
 
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
         <Route path="/matches" element={<Matches />} />
         <Route path="/players-statistics" element={<PlayersStatistics />} />
         <Route path="/leaderboard" element={<Leaderboard />} /> {/* Add Leaderboard route */}
+        <Route path="/teams" element={<Teams />} /> {/* Add the Teams route */}
 
       </Routes>
     </Router>

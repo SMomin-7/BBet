@@ -65,6 +65,11 @@ function Navbar() {
                   </Link>
                 </li>
                 <li>
+                  <Link to="/teams" className="navbar-link"> {/* Add the Teams link */}
+                    Teams
+                  </Link>
+                </li>
+                <li>
                   <Link to="/leaderboard" className="navbar-link">
                     Leaderboard
                   </Link>
