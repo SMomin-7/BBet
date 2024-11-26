@@ -39,10 +39,11 @@ function Signup() {
       return;
     }
 
-    if (isNaN(deposit) || parseFloat(deposit) <= 0) {
-      setError('Deposit must be a valid positive number.');
+    if (parseFloat(deposit) <= 0) {
+      setError('Deposit must be a positive number.');
       return;
     }
+    
 
     try {
       // eslint-disable-next-line no-unused-vars

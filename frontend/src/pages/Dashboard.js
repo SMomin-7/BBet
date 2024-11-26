@@ -51,6 +51,18 @@ function Dashboard() {
     const user = JSON.parse(localStorage.getItem('user')); // Get logged-in user
     const odds = selectedTeam === game.team1 ? game.odds.team1 : game.odds.team2;
 
+    // Validation: Ensure bet amount is greater than zero
+    if (betAmount <= 0) {
+      alert('Bet amount must be greater than zero.');
+      return;
+    }
+
+    // Validation: Ensure sufficient balance
+    if (betAmount > balance) {
+      alert('Insufficient balance.');
+      return;
+    }
+
     try {
       const response = await axios.post('http://127.0.0.1:8000/api/update-balance-and-place-bet/', {
         user_id: user.id,

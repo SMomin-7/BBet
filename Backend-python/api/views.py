@@ -5,6 +5,7 @@ import json
 from .models import CustomUser,Bet  # Use the renamed model
 from django.contrib.auth.hashers import make_password, check_password
 import logging
+from decimal import Decimal
 
 logger = logging.getLogger(__name__)
 
