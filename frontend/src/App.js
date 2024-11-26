@@ -7,6 +7,7 @@ import Navbar from './components/Navbar';
 import Dashboard from './pages/Dashboard';
 import Matches from './pages/Matches';
 import PlayersStatistics from './pages/PlayersStatistics';
+import Leaderboard from './pages/Leaderboard';
 
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} /> {/* Add the Dashboard route */}
         <Route path="/matches" element={<Matches />} />
         <Route path="/players-statistics" element={<PlayersStatistics />} />
+        <Route path="/leaderboard" element={<Leaderboard />} /> {/* Add Leaderboard route */}
 
       </Routes>
     </Router>

@@ -59,6 +59,11 @@ function Navbar() {
                 </Link>
               </li>
               <li>
+                <Link to="/leaderboard" className="navbar-link"> {/* Add the Leaderboard link */}
+                  Leaderboard
+                </Link>
+              </li>
+              <li>
                 <button onClick={handleLogout} className="navbar-link logout-button">
                   Logout
                 </button>

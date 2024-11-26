@@ -6,6 +6,8 @@ from .models import CustomUser,Bet  # Use the renamed model
 from django.contrib.auth.hashers import make_password, check_password
 import logging
 from decimal import Decimal
+from django.db.models import Count  # Import Count for aggregation
+from .models import CustomUser
 
 logger = logging.getLogger(__name__)
 
@@ -172,3 +174,34 @@ def update_balance_and_place_bet(request):
             return JsonResponse({'error': 'An internal server error occurred. Check logs for details.'}, status=500)
 
     return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+@csrf_exempt
+def get_leaderboard(request):
+    if request.method == 'GET':
+        try:
+            # Aggregate bets by user and count them
+            leaderboard_data = (
+                CustomUser.objects.annotate(num_bets=Count('bet'))
+                .values('name', 'email', 'num_bets')
+                .order_by('-num_bets')  # Sort by number of bets placed
+            )
+            return JsonResponse({'leaderboard': list(leaderboard_data)}, status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+@csrf_exempt
+def leaderboard(request):
+    try:
+        # Get users and their bet counts
+        users_with_bet_counts = (
+            CustomUser.objects.annotate(num_bets=Count('bet'))  # Use Count correctly
+            .order_by('-num_bets')  # Sort by number of bets, descending
+            .values('name', 'email', 'num_bets')
+        )
+
+        # Return the data as JSON
+        return JsonResponse({'leaderboard': list(users_with_bet_counts)}, status=200)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
