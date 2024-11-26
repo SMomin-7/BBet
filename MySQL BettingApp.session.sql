@@ -14,6 +14,12 @@ SELECT email, password FROM api_customuser;
 DESCRIBE api_bet;
 SELECT * FROM api_bet;
 
+DESCRIBE api_leaderboard;
+SELECT * FROM api_leaderboard;
+
+SELECT * FROM api_leaderboard ORDER BY bet_count DESC;
+
+
 
 
 

@@ -10,16 +10,18 @@ function Leaderboard() {
     const fetchLeaderboard = async () => {
       try {
         const response = await axios.get('http://127.0.0.1:8000/api/leaderboard/');
-        setLeaderboard(response.data.leaderboard); // Set the leaderboard data
+        console.log('API Response:', response.data.leaderboard); // Log API response
+        setLeaderboard(response.data.leaderboard); // Update state with leaderboard data
       } catch (error) {
         console.error('Error fetching leaderboard:', error);
       } finally {
         setLoading(false);
       }
     };
-
+  
     fetchLeaderboard();
   }, []);
+  
 
   return (
     <div className="leaderboard-container">
@@ -39,10 +41,10 @@ function Leaderboard() {
           <tbody>
             {leaderboard.map((user, index) => (
               <tr key={index}>
-                <td>{index + 1}</td>
-                <td>{user.name}</td>
-                <td>{user.email}</td>
-                <td>{user.num_bets}</td>
+                <td>{user.rank || index + 1}</td> {/* Use rank or fallback to index + 1 */}
+                <td>{user.user__name || 'N/A'}</td> {/* Ensure fallback values for undefined keys */}
+                <td>{user.user__email || 'N/A'}</td>
+                <td>{user.bet_count || 0}</td> {/* Default to 0 if bet_count is missing */}
               </tr>
             ))}
           </tbody>
@@ -52,6 +54,7 @@ function Leaderboard() {
       )}
     </div>
   );
+  
 }
 
 export default Leaderboard;

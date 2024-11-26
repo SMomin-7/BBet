@@ -29,3 +29,17 @@ class Bet(models.Model):
 
     def __str__(self):
         return f"{self.user.name} - {self.game} - {self.selected_team}"
+    
+
+from django.db import models
+from .models import CustomUser
+
+class Leaderboard(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)  # Relationship to user
+    rank = models.IntegerField(null=True, blank=True)  # Rank in the leaderboard
+    bet_count = models.IntegerField(default=0)  # Number of bets placed
+
+    def __str__(self):
+        return f"{self.user.name} - {self.rank} - {self.bet_count}"
+
+

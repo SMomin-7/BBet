@@ -8,6 +8,7 @@ import logging
 from decimal import Decimal
 from django.db.models import Count  # Import Count for aggregation
 from .models import CustomUser
+from .models import Leaderboard
 
 logger = logging.getLogger(__name__)
 
@@ -165,6 +166,11 @@ def update_balance_and_place_bet(request):
                 bet_amount=Decimal(bet_amount),
                 payout=Decimal(payout),
             )
+            
+            # Update the leaderboard
+            leaderboard_entry, created = Leaderboard.objects.get_or_create(user=user)
+            leaderboard_entry.bet_count += 1
+            leaderboard_entry.save()
 
             logger.info(f"Bet placed successfully for user_id={user_id}")
             return JsonResponse({'message': 'Bet placed successfully!', 'balance': user.balance}, status=201)
@@ -193,15 +199,87 @@ def get_leaderboard(request):
 @csrf_exempt
 def leaderboard(request):
     try:
-        # Get users and their bet counts
-        users_with_bet_counts = (
-            CustomUser.objects.annotate(num_bets=Count('bet'))  # Use Count correctly
-            .order_by('-num_bets')  # Sort by number of bets, descending
-            .values('name', 'email', 'num_bets')
+        # Update or create leaderboard entries dynamically
+        users_with_bet_counts = CustomUser.objects.annotate(num_bets=Count('bet')).order_by('-num_bets')
+
+        rank = 1  # Initialize rank
+        for user in users_with_bet_counts:
+            # Update or create Leaderboard entry for each user
+            Leaderboard.objects.update_or_create(
+                user=user,
+                defaults={
+                    'bet_count': user.num_bets,
+                    'rank': rank,
+                }
+            )
+            rank += 1  # Increment rank for the next user
+
+        # Fetch updated leaderboard data for response
+        leaderboard_data = Leaderboard.objects.select_related('user').order_by('rank').values(
+            'rank', 'user__name', 'user__email', 'bet_count'
         )
 
         # Return the data as JSON
-        return JsonResponse({'leaderboard': list(users_with_bet_counts)}, status=200)
+        return JsonResponse({'leaderboard': list(leaderboard_data)}, status=200)
+
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+    
+@csrf_exempt
+def import_leaderboard(request):
+    if request.method == 'POST':
+        try:
+            # Parse JSON data from the request
+            data = json.loads(request.body)
+            for entry in data:
+                name = entry.get('name')
+                email = entry.get('email')
+                num_bets = entry.get('num_bets')
+
+                # Check if user exists or create them
+                user, _ = CustomUser.objects.get_or_create(
+                    name=name,
+                    email=email
+                )
+
+                # Update or create leaderboard entry
+                Leaderboard.objects.update_or_create(
+                    user=user,
+                    defaults={'bet_count': num_bets},
+                )
+
+            return JsonResponse({'message': 'Leaderboard imported successfully!'}, status=201)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+@csrf_exempt
+def sync_leaderboard(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)  # Parse JSON payload
+            leaderboard_data = data.get('leaderboard', [])
+
+            # Update or create leaderboard entries and assign ranks
+            for index, entry in enumerate(
+                sorted(leaderboard_data, key=lambda x: x['num_bets'], reverse=True), start=1
+            ):
+                name = entry['name']
+                email = entry['email']
+                num_bets = entry['num_bets']
+
+                # Update or create user and leaderboard entries
+                user, created = CustomUser.objects.get_or_create(
+                    email=email,
+                    defaults={'name': name, 'password': 'placeholder'}
+                )
+                Leaderboard.objects.update_or_create(
+                    user=user,
+                    defaults={'bet_count': num_bets, 'rank': index}  # Assign rank
+                )
+
+            return JsonResponse({'message': 'Leaderboard synced and ranked successfully'}, status=200)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
 
