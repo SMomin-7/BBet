@@ -2,15 +2,17 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import '../styles/Dashboard.css';
 import Betform from '../components/Betform';
+import Notification from '../components/Notification';
 
 function Dashboard() {
-  const [balance, setBalance] = useState(0.0);
-  const [games, setGames] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedGame, setSelectedGame] = useState(null);
-  const [betHistory, setBetHistory] = useState([]);
+  const [balance, setBalance] = useState(0.0); // User's balance
+  const [games, setGames] = useState([]); // Available matches
+  const [loading, setLoading] = useState(true); // Loading state for matches
+  const [selectedGame, setSelectedGame] = useState(null); // Selected game for betting
+  const [betHistory, setBetHistory] = useState([]); // User's betting history
+  const [notification, setNotification] = useState(null); // Notification state
 
-  // Fetch user data (balance and bet history) on component mount
+  // Fetch user data and game data on component mount
   useEffect(() => {
     const fetchUserData = async () => {
       const user = JSON.parse(localStorage.getItem('user'));
@@ -18,11 +20,12 @@ function Dashboard() {
         console.error('No user found in localStorage.');
         return;
       }
+
       try {
         const response = await axios.get('http://127.0.0.1:8000/api/get-user-data/', {
           params: { user_id: user.id },
         });
-        setBalance(parseFloat(response.data.balance)); // Ensure balance is a number
+        setBalance(parseFloat(response.data.balance)); // Parse balance to ensure it's numeric
         setBetHistory(response.data.bet_history);
       } catch (error) {
         console.error('Error fetching user data:', error.response?.data?.error || error.message);
@@ -31,37 +34,41 @@ function Dashboard() {
 
     const fetchGames = async () => {
       setLoading(true);
-      setTimeout(() => {
+      try {
+        // Simulating games data - replace with actual API if available
         const mockGames = [
           { id: 1, team1: 'Team A', team2: 'Team B', odds: { team1: 1.5, team2: 2.3 } },
           { id: 2, team1: 'Team C', team2: 'Team D', odds: { team1: 1.8, team2: 1.9 } },
           { id: 3, team1: 'Team E', team2: 'Team F', odds: { team1: 2.0, team2: 1.6 } },
         ];
         setGames(mockGames);
+      } catch (error) {
+        console.error('Error fetching games data:', error.message);
+      } finally {
         setLoading(false);
-      }, 1000);
+      }
     };
 
     fetchUserData();
     fetchGames();
   }, []);
 
-  // Handle placing a bet
+  // Handle bet placement
   const handlePlaceBet = async (game, selectedTeam, betAmount) => {
     const user = JSON.parse(localStorage.getItem('user'));
     const odds = selectedTeam === game.team1 ? game.odds.team1 : game.odds.team2;
 
-    // Parse bet amount and balance as numbers
+    // Validate bet amount and balance
     const numericBetAmount = parseFloat(betAmount);
     const numericBalance = parseFloat(balance);
 
     if (numericBetAmount <= 0) {
-      alert('Bet amount must be greater than zero.');
+      setNotification({ message: 'Bet amount must be greater than zero.', type: 'error' });
       return;
     }
 
     if (numericBetAmount > numericBalance) {
-      alert('Insufficient balance.');
+      setNotification({ message: 'Insufficient balance.', type: 'error' });
       return;
     }
 
@@ -74,8 +81,8 @@ function Dashboard() {
         payout: numericBetAmount * odds,
       });
 
-      // Update balance and bet history
-      setBalance(parseFloat(response.data.balance)); // Ensure balance is updated as a number
+      // Update balance and betting history
+      setBalance(parseFloat(response.data.balance)); // Update balance
       setBetHistory((prevHistory) => [
         ...prevHistory,
         {
@@ -87,9 +94,10 @@ function Dashboard() {
         },
       ]);
 
-      alert(response.data.message);
-      setSelectedGame(null);
+      setNotification({ message: 'Bet placed successfully!', type: 'success' });
+      setSelectedGame(null); // Close the bet form
     } catch (error) {
+      setNotification({ message: 'Error placing bet. Please try again.', type: 'error' });
       console.error('Error placing bet:', error.response?.data?.error || error.message);
     }
   };
@@ -97,9 +105,22 @@ function Dashboard() {
   return (
     <div className="dashboard-container">
       <h1>Dashboard</h1>
+
+      {/* Render Notifications */}
+      {notification && (
+        <Notification
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification(null)}
+        />
+      )}
+
+      {/* User Balance */}
       <div className="user-balance">
         <h2>Your Balance: ${balance.toFixed(2)}</h2>
       </div>
+
+      {/* Available Matches */}
       <div className="games-list">
         <h2>Available Matches</h2>
         {loading ? (
@@ -124,6 +145,8 @@ function Dashboard() {
           ))
         )}
       </div>
+
+      {/* Betting Form */}
       {selectedGame && (
         <Betform
           game={selectedGame}
@@ -132,6 +155,8 @@ function Dashboard() {
           userBalance={balance}
         />
       )}
+
+      {/* Bet History */}
       <div className="bet-history">
         <h2>Your Bets</h2>
         {betHistory.length > 0 ? (
