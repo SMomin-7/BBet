@@ -133,6 +133,11 @@ def update_balance_and_place_bet(request):
                 logger.error("Missing fields in payload")
                 return JsonResponse({'error': 'All fields are required'}, status=400)
 
+            # Ensure bet_amount and payout are non-negative
+            if float(bet_amount) <= 0 or float(payout) <= 0:
+                logger.error("Bet amount and payout must be positive")
+                return JsonResponse({'error': 'Bet amount and payout must be positive'}, status=400)
+
             # Fetch the user
             try:
                 user = CustomUser.objects.get(user_id=user_id)
@@ -141,12 +146,11 @@ def update_balance_and_place_bet(request):
                 return JsonResponse({'error': 'User not found'}, status=404)
 
             # Ensure sufficient balance
-            if user.balance < float(bet_amount):
+            if user.balance < Decimal(bet_amount):
                 logger.error("Insufficient balance")
                 return JsonResponse({'error': 'Insufficient balance'}, status=400)
 
             # Deduct the bet amount and update balance
-            from decimal import Decimal
             user.balance -= Decimal(bet_amount)
             user.save()
 
@@ -155,8 +159,8 @@ def update_balance_and_place_bet(request):
                 user=user,
                 game=game,
                 selected_team=selected_team,
-                bet_amount=float(bet_amount),
-                payout=float(payout),
+                bet_amount=Decimal(bet_amount),
+                payout=Decimal(payout),
             )
 
             logger.info(f"Bet placed successfully for user_id={user_id}")
