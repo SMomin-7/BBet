@@ -13,18 +13,21 @@ function BetForm({ game, onPlaceBet, onClose, userBalance }) {
     e.preventDefault();
     setError(''); // Clear previous errors
 
+    const numericBetAmount = parseFloat(betAmount);
+    const numericBalance = parseFloat(userBalance);
+
     // Validation
-    if (!selectedTeam || !betAmount) {
+    if (!selectedTeam || isNaN(numericBetAmount)) {
       setError('All fields are required.');
       return;
     }
 
-    if (betAmount <= 0) {
+    if (numericBetAmount <= 0) {
       setError('Bet amount must be greater than zero.');
       return;
     }
 
-    if (betAmount > userBalance) {
+    if (numericBetAmount > numericBalance) {
       setError('Insufficient balance.');
       return;
     }
@@ -89,7 +92,7 @@ function BetForm({ game, onPlaceBet, onClose, userBalance }) {
           betDetails={{
             team1: game.team1,
             team2: game.team2,
-            amount: betAmount,
+            amount: parseFloat(betAmount).toFixed(2), // Format amount to 2 decimal places
             team: selectedTeam,
           }}
           onConfirm={handleConfirm}

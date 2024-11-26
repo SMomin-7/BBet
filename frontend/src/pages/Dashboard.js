@@ -22,8 +22,8 @@ function Dashboard() {
         const response = await axios.get('http://127.0.0.1:8000/api/get-user-data/', {
           params: { user_id: user.id },
         });
-        setBalance(response.data.balance); // Set user balance
-        setBetHistory(response.data.bet_history); // Set bet history
+        setBalance(parseFloat(response.data.balance)); // Ensure balance is a number
+        setBetHistory(response.data.bet_history);
       } catch (error) {
         console.error('Error fetching user data:', error.response?.data?.error || error.message);
       }
@@ -51,12 +51,16 @@ function Dashboard() {
     const user = JSON.parse(localStorage.getItem('user'));
     const odds = selectedTeam === game.team1 ? game.odds.team1 : game.odds.team2;
 
-    if (betAmount <= 0) {
+    // Parse bet amount and balance as numbers
+    const numericBetAmount = parseFloat(betAmount);
+    const numericBalance = parseFloat(balance);
+
+    if (numericBetAmount <= 0) {
       alert('Bet amount must be greater than zero.');
       return;
     }
 
-    if (betAmount > balance) {
+    if (numericBetAmount > numericBalance) {
       alert('Insufficient balance.');
       return;
     }
@@ -66,19 +70,19 @@ function Dashboard() {
         user_id: user.id,
         game: `${game.team1} vs ${game.team2}`,
         selected_team: selectedTeam,
-        bet_amount: parseFloat(betAmount),
-        payout: parseFloat(betAmount * odds),
+        bet_amount: numericBetAmount,
+        payout: numericBetAmount * odds,
       });
 
       // Update balance and bet history
-      setBalance(response.data.balance);
+      setBalance(parseFloat(response.data.balance)); // Ensure balance is updated as a number
       setBetHistory((prevHistory) => [
         ...prevHistory,
         {
           game: `${game.team1} vs ${game.team2}`,
           selected_team: selectedTeam,
-          bet_amount: parseFloat(betAmount).toFixed(2),
-          payout: (betAmount * odds).toFixed(2),
+          bet_amount: numericBetAmount.toFixed(2),
+          payout: (numericBetAmount * odds).toFixed(2),
           result: 'Pending',
         },
       ]);
@@ -94,7 +98,7 @@ function Dashboard() {
     <div className="dashboard-container">
       <h1>Dashboard</h1>
       <div className="user-balance">
-        <h2>Your Balance: ${parseFloat(balance).toFixed(2)}</h2>
+        <h2>Your Balance: ${balance.toFixed(2)}</h2>
       </div>
       <div className="games-list">
         <h2>Available Matches</h2>
@@ -125,7 +129,7 @@ function Dashboard() {
           game={selectedGame}
           onPlaceBet={handlePlaceBet}
           onClose={() => setSelectedGame(null)}
-          userBalance={balance} // Pass balance to Betform
+          userBalance={balance}
         />
       )}
       <div className="bet-history">
