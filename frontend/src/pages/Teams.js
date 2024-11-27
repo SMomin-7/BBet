@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/Teams.css'; // Import CSS file for styling
+import axios from 'axios';
 
 function Teams() {
   const [teams, setTeams] = useState([]); // State to hold team data
@@ -8,19 +9,10 @@ function Teams() {
   useEffect(() => {
     const fetchTeams = async () => {
       try {
-        // Mock data for teams
-        const mockTeams = [
-          { position: 1, name: 'Team Alpha', coach: 'Coach A', year: 1998, points: 10 },
-          { position: 2, name: 'Team Beta', coach: 'Coach B', year: 2002, points: 10 },
-          { position: 3, name: 'Team Gamma', coach: 'Coach C', year: 2010, points: 10 },
-          { position: 4, name: 'Team Delta', coach: 'Coach D', year: 2005, points: 10 },
-        ];
-
-        // Simulate API delay using setTimeout
-        setTimeout(() => {
-          setTeams(mockTeams); // Update state with mock data
-          setLoading(false); // Turn off loading state
-        }, 1000);
+        // Fetch data from backend API
+        const response = await axios.get('http://127.0.0.1:8000/api/teams/');
+        setTeams(response.data.teams); // Update state with API data
+        setLoading(false); // Turn off loading state
       } catch (error) {
         console.error('Error fetching team data:', error);
         setLoading(false);
@@ -42,18 +34,18 @@ function Teams() {
               <th>Position</th>
               <th>Team Name</th>
               <th>Coach Name</th>
-              <th>Established Year</th>
+              <th>Year Founded</th>
               <th>Points</th>
             </tr>
           </thead>
           <tbody>
             {teams.map((team, index) => (
               <tr key={index}>
-                <td>{team.position}</td>
-                <td>{team.name}</td>
-                <td>{team.coach}</td>
-                <td>{team.year}</td>
-                <td>{team.points}</td>
+                <td>{team.ranking}</td> {/* Use 'ranking' from API */}
+                <td>{team.name}</td> {/* Team Name */}
+                <td>{team.coach}</td> {/* Coach Name */}
+                <td>{team.year_founded}</td> {/* Year Founded */}
+                <td>{team.points}</td> {/* Points */}
               </tr>
             ))}
           </tbody>

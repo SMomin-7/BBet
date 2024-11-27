@@ -9,6 +9,7 @@ from decimal import Decimal
 from django.db.models import Count  # Import Count for aggregation
 from .models import CustomUser
 from .models import Leaderboard
+from .models import Team
 
 logger = logging.getLogger(__name__)
 
@@ -282,4 +283,10 @@ def sync_leaderboard(request):
             return JsonResponse({'message': 'Leaderboard synced and ranked successfully'}, status=200)
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
+        
+@csrf_exempt
+def get_teams(request):
+    teams = Team.objects.all().order_by('ranking')  # Order by ranking
+    data = list(teams.values('ranking', 'name', 'coach', 'year_founded', 'points'))
+    return JsonResponse({'teams': data})
 

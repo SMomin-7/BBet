@@ -41,5 +41,15 @@ class Leaderboard(models.Model):
 
     def __str__(self):
         return f"{self.user.name} - {self.rank} - {self.bet_count}"
+    
+class Team(models.Model):
+    name = models.CharField(max_length=100, primary_key=True)  # Primary Key
+    coach = models.CharField(max_length=100)
+    ranking = models.IntegerField(default=0)
+    year_founded = models.IntegerField()
+    points = models.IntegerField(default=10)
+
+    def __str__(self):
+        return self.name
 
 
