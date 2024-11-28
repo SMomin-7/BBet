@@ -418,14 +418,18 @@ from datetime import datetime
 @csrf_exempt
 def get_matches(request):
     try:
-        # Fetch upcoming matches (not completed and in the future)
-        upcoming_matches = Match.objects.filter(completed=False, timestamp__gte=datetime.now()).values(
+        # Fetch upcoming matches (not completed and in the future), ordered by timestamp ascending
+        upcoming_matches = Match.objects.filter(
+            completed=False, timestamp__gte=datetime.now()
+        ).order_by('timestamp').values(
             'id', 'team1__name', 'team2__name', 'timestamp', 'stadium',
             'team1_odds', 'team2_odds', 'team1_score', 'team2_score', 'winner__name'
         )
 
-        # Fetch completed matches (completed and past date)
-        completed_matches = Match.objects.filter(completed=True, timestamp__lte=datetime.now()).values(
+        # Fetch completed matches (completed and past date), ordered by timestamp descending
+        completed_matches = Match.objects.filter(
+            completed=True, timestamp__lte=datetime.now()
+        ).order_by('-timestamp').values(
             'id', 'team1__name', 'team2__name', 'timestamp', 'stadium',
             'team1_odds', 'team2_odds', 'team1_score', 'team2_score', 'winner__name'
         )
@@ -446,12 +450,15 @@ def get_matches(request):
                 'winner': match['winner__name'],
             }
 
+        # Apply formatting
         upcoming_matches = [format_match(match) for match in upcoming_matches]
         completed_matches = [format_match(match) for match in completed_matches]
 
+        # Return the data in the required format
         return JsonResponse({'upcoming_matches': upcoming_matches, 'completed_matches': completed_matches}, status=200)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
 
 
 
