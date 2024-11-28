@@ -320,13 +320,13 @@ def generate_matches(request):
 
         # Shuffle teams for random pairing
         random.shuffle(teams)
-        
+
         # Initialize scheduling variables
         start_time = datetime.now().replace(hour=12, minute=0, second=0, microsecond=0)  # Matches start at 12 PM
         max_matches_per_day = 3  # Limit matches to 3 per day
         time_gap = timedelta(hours=3)  # 3-hour gap between matches
         scheduled_matches = []  # Keep track of scheduled matches
-        
+
         match_count = 0
 
         # Pair teams and schedule matches
@@ -334,23 +334,35 @@ def generate_matches(request):
             team1 = teams[i]
             team2 = teams[i + 1]
 
+            # Generate random odds for both teams
+            team1_odds = round(random.uniform(1.5, 3.0), 2)
+            team2_odds = round(random.uniform(1.5, 3.0), 2)
+
             # Check if match already exists
-            match, created = Match.objects.get_or_create(team1=team1, team2=team2)
+            match, created = Match.objects.get_or_create(
+                team1=team1,
+                team2=team2,
+                defaults={
+                    'team1_odds': team1_odds,
+                    'team2_odds': team2_odds,
+                    'stadium': random.choice(STADIUMS),
+                    'timestamp': start_time,
+                }
+            )
 
-            # Calculate match start time
-            if match_count >= max_matches_per_day:
-                # Move to the next day
-                start_time += timedelta(days=1)
-                start_time = start_time.replace(hour=12, minute=0, second=0, microsecond=0)
-                match_count = 0  # Reset daily match count
-
-            match.timestamp = start_time
-            match.stadium = random.choice(STADIUMS)  # Assign random stadium
-            match.save()
+            # Update odds and timestamp if match already exists
+            if not created:
+                match.team1_odds = team1_odds
+                match.team2_odds = team2_odds
+                match.timestamp = start_time
+                match.stadium = random.choice(STADIUMS)
+                match.save()
 
             scheduled_matches.append({
                 'team1': team1.name,
                 'team2': team2.name,
+                'team1_odds': team1_odds,
+                'team2_odds': team2_odds,
                 'date': match.timestamp.strftime('%b %d, %Y %I:%M %p'),
                 'stadium': match.stadium,
                 'team1_score': match.team1_score,
@@ -361,11 +373,17 @@ def generate_matches(request):
             # Increment time and match count
             start_time += time_gap
             match_count += 1
+            if match_count >= max_matches_per_day:
+                # Move to the next day
+                start_time += timedelta(days=1)
+                start_time = start_time.replace(hour=12, minute=0, second=0, microsecond=0)
+                match_count = 0  # Reset daily match count
 
         return JsonResponse({'matches': scheduled_matches}, status=200)
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
 
 
 import random
@@ -390,7 +408,8 @@ from datetime import datetime
 def get_matches(request):
     try:
         matches = Match.objects.all().values(
-            'id', 'team1__name', 'team2__name', 'timestamp', 'stadium', 'team1_score', 'team2_score', 'winner__name'
+            'id', 'team1__name', 'team2__name', 'timestamp', 'stadium',
+            'team1_odds', 'team2_odds', 'team1_score', 'team2_score', 'winner__name'
         )
 
         data = []
@@ -407,6 +426,8 @@ def get_matches(request):
                 'team2': match['team2__name'],
                 'date': formatted_date,
                 'stadium': match['stadium'],
+                'team1_odds': match['team1_odds'],
+                'team2_odds': match['team2_odds'],
                 'team1_score': match['team1_score'],
                 'team2_score': match['team2_score'],
                 'winner': match['winner__name'],

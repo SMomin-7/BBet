@@ -60,6 +60,8 @@ class Match(models.Model):
     team2_score = models.IntegerField(null=True, blank=True)
     winner = models.ForeignKey(Team, related_name='wins', null=True, blank=True, on_delete=models.SET_NULL)
     stadium = models.CharField(max_length=255, default='McMahon Stadium')
+    team1_odds = models.FloatField(default=1.0)  # Default odds for team 1
+    team2_odds = models.FloatField(default=1.0)  # Default odds for team 2
 
     def __str__(self):
         return f"{self.team1.name} vs {self.team2.name}"
