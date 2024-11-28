@@ -444,6 +444,8 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import Match, Bet
 
+from django.db.models import F
+
 @csrf_exempt
 def simulate_matches(request):
     try:
@@ -458,12 +460,18 @@ def simulate_matches(request):
             # Determine the winner
             if team1_score > team2_score:
                 match.winner = match.team1
+                match.team1.points = F('points') + 10  # Add 10 points to the winning team
+                match.team2.points = F('points')  # No points for the losing team
             elif team2_score > team1_score:
                 match.winner = match.team2
+                match.team2.points = F('points') + 10
+                match.team1.points = F('points')
             else:
-                match.winner = None  # Draw scenario
+                match.winner = None  # Draw scenario, no points awarded
 
             match.save()
+            match.team1.save()
+            match.team2.save()
 
             # Update bets associated with the match (game field)
             bets = Bet.objects.filter(game=match)  # Use game instead of match
@@ -482,7 +490,24 @@ def simulate_matches(request):
                     bet.payout = Decimal(0)
                 bet.save()
 
+        # Recalculate team rankings after all matches
+        update_team_rankings()
+
         return JsonResponse({'message': 'Matches simulated successfully'}, status=200)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+
+def update_team_rankings():
+    """
+    Recalculate team rankings based on points.
+    """
+    try:
+        teams = Team.objects.all().order_by('-points', 'name')  # Sort by points (descending), then name (ascending)
+        for index, team in enumerate(teams, start=1):
+            team.ranking = index  # Update the ranking field
+            team.save()
+    except Exception as e:
+        print(f"Error updating team rankings: {e}")
+
 
