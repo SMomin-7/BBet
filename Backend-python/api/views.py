@@ -309,6 +309,7 @@ STADIUMS = [
     "Mosaic Stadium"
 ]
 
+
 @csrf_exempt
 def generate_matches(request):
     try:
@@ -317,39 +318,55 @@ def generate_matches(request):
         if len(teams) < 2:
             return JsonResponse({'error': 'Not enough teams to generate matches'}, status=400)
 
-        # Shuffle teams and pair them
+        # Shuffle teams for random pairing
         random.shuffle(teams)
-        matches = []
+        
+        # Initialize scheduling variables
+        start_time = datetime.now().replace(hour=12, minute=0, second=0, microsecond=0)  # Matches start at 12 PM
+        max_matches_per_day = 3  # Limit matches to 3 per day
+        time_gap = timedelta(hours=3)  # 3-hour gap between matches
+        scheduled_matches = []  # Keep track of scheduled matches
+        
+        match_count = 0
+
+        # Pair teams and schedule matches
         for i in range(0, len(teams) - 1, 2):
             team1 = teams[i]
             team2 = teams[i + 1]
 
-            # Assign a random stadium
-            stadium = random.choice(STADIUMS)
+            # Check if match already exists
+            match, created = Match.objects.get_or_create(team1=team1, team2=team2)
 
-            # Check if match already exists, create if it doesn't
-            match, created = Match.objects.get_or_create(
-                team1=team1,
-                team2=team2,
-                defaults={
-                    'timestamp': now(),  # Assign current time
-                    'stadium': stadium
-                }
-            )
+            # Calculate match start time
+            if match_count >= max_matches_per_day:
+                # Move to the next day
+                start_time += timedelta(days=1)
+                start_time = start_time.replace(hour=12, minute=0, second=0, microsecond=0)
+                match_count = 0  # Reset daily match count
 
-            matches.append({
+            match.timestamp = start_time
+            match.stadium = random.choice(STADIUMS)  # Assign random stadium
+            match.save()
+
+            scheduled_matches.append({
                 'team1': team1.name,
                 'team2': team2.name,
+                'date': match.timestamp.strftime('%b %d, %Y %I:%M %p'),
                 'stadium': match.stadium,
                 'team1_score': match.team1_score,
                 'team2_score': match.team2_score,
                 'winner': match.winner.name if match.winner else None,
             })
 
-        return JsonResponse({'matches': matches}, status=200)
+            # Increment time and match count
+            start_time += time_gap
+            match_count += 1
+
+        return JsonResponse({'matches': scheduled_matches}, status=200)
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
 
 import random
 from datetime import datetime
@@ -367,6 +384,8 @@ STADIUMS = [
     "Mosaic Stadium",
 ]
 
+from datetime import datetime
+
 @csrf_exempt
 def get_matches(request):
     try:
@@ -376,28 +395,18 @@ def get_matches(request):
 
         data = []
         for match in matches:
-            # Ensure the timestamp is properly formatted
-            timestamp = match.get('timestamp')
-            formatted_date = 'Date Unavailable'
+            timestamp = match['timestamp']
+            formatted_date = (
+                datetime.strftime(timestamp, '%b %d, %Y %I:%M %p')
+                if timestamp else 'Date Unavailable'
+            )
 
-            if timestamp:
-                try:
-                    formatted_date = datetime.strptime(
-                        str(timestamp).split('.')[0], '%Y-%m-%d %H:%M:%S'
-                    ).strftime('%b %d, %Y %I:%M %p')
-                except ValueError:
-                    formatted_date = 'Invalid Date'
-
-            # Fallback to a random stadium if the value is None
-            stadium = match.get('stadium') or random.choice(STADIUMS)
-
-            # Add formatted match data
             data.append({
                 'id': match['id'],
                 'team1': match['team1__name'],
                 'team2': match['team2__name'],
                 'date': formatted_date,
-                'stadium': stadium,
+                'stadium': match['stadium'],
                 'team1_score': match['team1_score'],
                 'team2_score': match['team2_score'],
                 'winner': match['winner__name'],
@@ -406,8 +415,8 @@ def get_matches(request):
         return JsonResponse({'matches': data}, status=200)
 
     except Exception as e:
-        # Provide detailed error information for debugging
         return JsonResponse({'error': str(e)}, status=500)
+
 
 
 
