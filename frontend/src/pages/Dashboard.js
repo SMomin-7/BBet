@@ -35,13 +35,14 @@ function Dashboard() {
     const fetchGames = async () => {
       setLoading(true);
       try {
-        // Simulating games data - replace with actual API if available
-        const mockGames = [
-          { id: 1, team1: 'Team A', team2: 'Team B', odds: { team1: 1.5, team2: 2.3 } },
-          { id: 2, team1: 'Team C', team2: 'Team D', odds: { team1: 1.8, team2: 1.9 } },
-          { id: 3, team1: 'Team E', team2: 'Team F', odds: { team1: 2.0, team2: 1.6 } },
-        ];
-        setGames(mockGames);
+        const response = await axios.get('http://127.0.0.1:8000/api/matches/'); // Fetch matches from backend
+        const formattedGames = response.data.matches.map((match) => ({
+          id: match.id,
+          team1: match.team1,
+          team2: match.team2,
+          odds: { team1: match.team1_odds, team2: match.team2_odds },
+        }));
+        setGames(formattedGames);
       } catch (error) {
         console.error('Error fetching games data:', error.message);
       } finally {
