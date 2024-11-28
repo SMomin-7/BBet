@@ -1,28 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/Matches.css'; // Ensure the styles are created
+import axios from 'axios';
 
 function Matches() {
   const [matches, setMatches] = useState([]); // State for all matches
   const [loading, setLoading] = useState(true); // State for loading
   const [filter, setFilter] = useState(''); // State for filtering matches
 
-  // Simulate fetching matches from a backend
+  // Fetch matches from the backend
   useEffect(() => {
     const fetchMatches = async () => {
-      setLoading(true);
-      setTimeout(() => {
-        const mockMatches = [
-          { id: 1, date: '2024-11-21', team1: 'Team A', team2: 'Team B', stadium: 'Stadium 1' },
-          { id: 2, date: '2024-11-22', team1: 'Team C', team2: 'Team D', stadium: 'Stadium 2' },
-          { id: 3, date: '2024-11-23', team1: 'Team E', team2: 'Team F', stadium: 'Stadium 3' },
-        ];
-        setMatches(mockMatches);
+      try {
+        setLoading(true);
+        const response = await axios.get('http://127.0.0.1:8000/api/matches/'); // API endpoint for matches
+
+        const formattedMatches = response.data.matches.map((match) => ({
+          ...match,
+          date: match.date || 'Date Unavailable', // Use the date from backend or fallback
+          stadium: match.stadium || 'McMahon Stadium', // Use the stadium from backend or fallback
+        }));
+
+        setMatches(formattedMatches); // Update matches state with formatted data
+      } catch (error) {
+        console.error('Error fetching matches:', error.message || error);
+      } finally {
         setLoading(false);
-      }, 1000); // Simulate 1-second delay
+      }
     };
 
     fetchMatches();
-  }, []);
+  }, []); // Empty dependency array ensures this runs once on mount
 
   // Filter matches by team name
   const filteredMatches = matches.filter(
@@ -33,31 +40,32 @@ function Matches() {
 
   return (
     <div className="matches-container">
-      <h1>Matches</h1>
+      <h1>Upcoming Matches</h1>
       <div className="filter-container">
         <input
           type="text"
           placeholder="Filter by team name"
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
+          className="filter-input"
         />
       </div>
       {loading ? (
-        <p>Loading matches...</p>
+        <p className="loading-message">Loading matches...</p>
       ) : filteredMatches.length > 0 ? (
         <div className="matches-list">
-          {filteredMatches.map((match) => (
-            <div key={match.id} className="match-card">
-              <p>
+          {filteredMatches.map((match, index) => (
+            <div key={index} className="match-card">
+              <p className="match-details">
                 <strong>{match.team1}</strong> vs <strong>{match.team2}</strong>
               </p>
-              <p>Date: {match.date}</p>
-              <p>Stadium: {match.stadium}</p>
+              <p className="match-details">Date: {match.date}</p>
+              <p className="match-details">Stadium: {match.stadium}</p>
             </div>
           ))}
         </div>
       ) : (
-        <p>No matches found.</p>
+        <p className="no-matches-message">No matches found.</p>
       )}
     </div>
   );

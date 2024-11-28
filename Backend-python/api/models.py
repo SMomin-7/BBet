@@ -51,5 +51,17 @@ class Team(models.Model):
 
     def __str__(self):
         return self.name
+    
+class Match(models.Model):
+    team1 = models.ForeignKey(Team, related_name='team1_matches', on_delete=models.CASCADE)
+    team2 = models.ForeignKey(Team, related_name='team2_matches', on_delete=models.CASCADE)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    team1_score = models.IntegerField(null=True, blank=True)
+    team2_score = models.IntegerField(null=True, blank=True)
+    winner = models.ForeignKey(Team, related_name='wins', null=True, blank=True, on_delete=models.SET_NULL)
+    stadium = models.CharField(max_length=255, default='McMahon Stadium')
+
+    def __str__(self):
+        return f"{self.team1.name} vs {self.team2.name}"
 
 

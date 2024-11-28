@@ -9,7 +9,10 @@ from decimal import Decimal
 from django.db.models import Count  # Import Count for aggregation
 from .models import CustomUser
 from .models import Leaderboard
-from .models import Team
+from .models import Team,Match
+import random
+from .models import Match
+from datetime import datetime, timedelta
 
 logger = logging.getLogger(__name__)
 
@@ -289,4 +292,123 @@ def get_teams(request):
     teams = Team.objects.all().order_by('ranking')  # Order by ranking
     data = list(teams.values('ranking', 'name', 'coach', 'year_founded', 'points'))
     return JsonResponse({'teams': data})
+
+
+import random
+from datetime import datetime
+from django.utils.timezone import now
+
+STADIUMS = [
+    "BC Place",
+    "Scotiabank Arena",
+    "Rogers Centre",
+    "McMahon Stadium",
+    "Commonwealth Stadium",
+    "Tim Hortons Field",
+    "TD Place Stadium",
+    "Mosaic Stadium"
+]
+
+@csrf_exempt
+def generate_matches(request):
+    try:
+        # Get all teams
+        teams = list(Team.objects.all())
+        if len(teams) < 2:
+            return JsonResponse({'error': 'Not enough teams to generate matches'}, status=400)
+
+        # Shuffle teams and pair them
+        random.shuffle(teams)
+        matches = []
+        for i in range(0, len(teams) - 1, 2):
+            team1 = teams[i]
+            team2 = teams[i + 1]
+
+            # Assign a random stadium
+            stadium = random.choice(STADIUMS)
+
+            # Check if match already exists, create if it doesn't
+            match, created = Match.objects.get_or_create(
+                team1=team1,
+                team2=team2,
+                defaults={
+                    'timestamp': now(),  # Assign current time
+                    'stadium': stadium
+                }
+            )
+
+            matches.append({
+                'team1': team1.name,
+                'team2': team2.name,
+                'stadium': match.stadium,
+                'team1_score': match.team1_score,
+                'team2_score': match.team2_score,
+                'winner': match.winner.name if match.winner else None,
+            })
+
+        return JsonResponse({'matches': matches}, status=200)
+
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+import random
+from datetime import datetime
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+
+STADIUMS = [
+    "BC Place",
+    "Scotiabank Arena",
+    "Rogers Centre",
+    "McMahon Stadium",
+    "Commonwealth Stadium",
+    "Tim Hortons Field",
+    "TD Place Stadium",
+    "Mosaic Stadium",
+]
+
+@csrf_exempt
+def get_matches(request):
+    try:
+        matches = Match.objects.all().values(
+            'id', 'team1__name', 'team2__name', 'timestamp', 'stadium', 'team1_score', 'team2_score', 'winner__name'
+        )
+
+        data = []
+        for match in matches:
+            # Ensure the timestamp is properly formatted
+            timestamp = match.get('timestamp')
+            formatted_date = 'Date Unavailable'
+
+            if timestamp:
+                try:
+                    formatted_date = datetime.strptime(
+                        str(timestamp).split('.')[0], '%Y-%m-%d %H:%M:%S'
+                    ).strftime('%b %d, %Y %I:%M %p')
+                except ValueError:
+                    formatted_date = 'Invalid Date'
+
+            # Fallback to a random stadium if the value is None
+            stadium = match.get('stadium') or random.choice(STADIUMS)
+
+            # Add formatted match data
+            data.append({
+                'id': match['id'],
+                'team1': match['team1__name'],
+                'team2': match['team2__name'],
+                'date': formatted_date,
+                'stadium': stadium,
+                'team1_score': match['team1_score'],
+                'team2_score': match['team2_score'],
+                'winner': match['winner__name'],
+            })
+
+        return JsonResponse({'matches': data}, status=200)
+
+    except Exception as e:
+        # Provide detailed error information for debugging
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+
 

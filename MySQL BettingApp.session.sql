@@ -22,6 +22,9 @@ SELECT * FROM api_leaderboard ORDER BY bet_count DESC;
 DESCRIBE api_team;
 SELECT * FROM api_team ORDER BY ranking ASC;
 
+DESCRIBE api_match;
+SELECT * FROM api_match;
+
 
 
 
