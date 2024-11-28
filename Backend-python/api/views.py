@@ -438,7 +438,51 @@ def get_matches(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
+from decimal import Decimal
+import random
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import Match, Bet
 
+@csrf_exempt
+def simulate_matches(request):
+    try:
+        matches = Match.objects.all()  # Fetch all matches
+        for match in matches:
+            # Generate random scores for the teams
+            team1_score = random.randint(0, 5)
+            team2_score = random.randint(0, 5)
+            match.team1_score = team1_score
+            match.team2_score = team2_score
 
+            # Determine the winner
+            if team1_score > team2_score:
+                match.winner = match.team1
+            elif team2_score > team1_score:
+                match.winner = match.team2
+            else:
+                match.winner = None  # Draw scenario
 
+            match.save()
+
+            # Update bets associated with the match (game field)
+            bets = Bet.objects.filter(game=match)  # Use game instead of match
+            for bet in bets:
+                if match.winner is None:  # If it's a draw
+                    bet.result = 'lost'
+                    bet.payout = Decimal(0)
+                elif bet.selected_team == match.winner.name:  # Winning bet
+                    bet.result = 'won'
+                    odds = Decimal(match.team1_odds) if bet.selected_team == match.team1.name else Decimal(match.team2_odds)
+                    bet.payout = bet.bet_amount * odds
+                    bet.user.balance += bet.payout  # Update user balance
+                    bet.user.save()
+                else:  # Losing bet
+                    bet.result = 'lost'
+                    bet.payout = Decimal(0)
+                bet.save()
+
+        return JsonResponse({'message': 'Matches simulated successfully'}, status=200)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
