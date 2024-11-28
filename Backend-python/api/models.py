@@ -62,6 +62,7 @@ class Match(models.Model):
     stadium = models.CharField(max_length=255, default='McMahon Stadium')
     team1_odds = models.FloatField(default=1.0)  # Default odds for team 1
     team2_odds = models.FloatField(default=1.0)  # Default odds for team 2
+    completed = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.team1.name} vs {self.team2.name}"

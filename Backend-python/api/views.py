@@ -327,7 +327,7 @@ def generate_matches(request):
         time_gap = timedelta(hours=3)  # 3-hour gap between matches
         scheduled_matches = []  # Keep track of scheduled matches
 
-        match_count = 0
+        match_count = 0  # Track the number of matches in the current day
 
         # Pair teams and schedule matches
         for i in range(0, len(teams) - 1, 2):
@@ -338,6 +338,13 @@ def generate_matches(request):
             team1_odds = round(random.uniform(1.5, 3.0), 2)
             team2_odds = round(random.uniform(1.5, 3.0), 2)
 
+            # Assign a stadium
+            stadium = random.choice(STADIUMS)
+
+            # Check for time conflicts in the same stadium
+            while Match.objects.filter(timestamp=start_time, stadium=stadium, completed=False).exists():
+                start_time += time_gap  # Increment start time to avoid conflict
+
             # Check if match already exists
             match, created = Match.objects.get_or_create(
                 team1=team1,
@@ -345,7 +352,7 @@ def generate_matches(request):
                 defaults={
                     'team1_odds': team1_odds,
                     'team2_odds': team2_odds,
-                    'stadium': random.choice(STADIUMS),
+                    'stadium': stadium,
                     'timestamp': start_time,
                 }
             )
@@ -355,7 +362,7 @@ def generate_matches(request):
                 match.team1_odds = team1_odds
                 match.team2_odds = team2_odds
                 match.timestamp = start_time
-                match.stadium = random.choice(STADIUMS)
+                match.stadium = stadium
                 match.save()
 
             scheduled_matches.append({
@@ -373,8 +380,9 @@ def generate_matches(request):
             # Increment time and match count
             start_time += time_gap
             match_count += 1
+
+            # Move to the next day if daily limit is reached
             if match_count >= max_matches_per_day:
-                # Move to the next day
                 start_time += timedelta(days=1)
                 start_time = start_time.replace(hour=12, minute=0, second=0, microsecond=0)
                 match_count = 0  # Reset daily match count
@@ -383,6 +391,7 @@ def generate_matches(request):
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
 
 
 
@@ -404,23 +413,27 @@ STADIUMS = [
 
 from datetime import datetime
 
+from datetime import datetime
+
 @csrf_exempt
 def get_matches(request):
     try:
-        matches = Match.objects.all().values(
+        # Fetch upcoming matches (not completed and in the future)
+        upcoming_matches = Match.objects.filter(completed=False, timestamp__gte=datetime.now()).values(
             'id', 'team1__name', 'team2__name', 'timestamp', 'stadium',
             'team1_odds', 'team2_odds', 'team1_score', 'team2_score', 'winner__name'
         )
 
-        data = []
-        for match in matches:
-            timestamp = match['timestamp']
-            formatted_date = (
-                datetime.strftime(timestamp, '%b %d, %Y %I:%M %p')
-                if timestamp else 'Date Unavailable'
-            )
+        # Fetch completed matches (completed and past date)
+        completed_matches = Match.objects.filter(completed=True, timestamp__lte=datetime.now()).values(
+            'id', 'team1__name', 'team2__name', 'timestamp', 'stadium',
+            'team1_odds', 'team2_odds', 'team1_score', 'team2_score', 'winner__name'
+        )
 
-            data.append({
+        # Format the matches
+        def format_match(match):
+            formatted_date = datetime.strftime(match['timestamp'], '%b %d, %Y %I:%M %p') if match['timestamp'] else 'Date Unavailable'
+            return {
                 'id': match['id'],
                 'team1': match['team1__name'],
                 'team2': match['team2__name'],
@@ -431,12 +444,17 @@ def get_matches(request):
                 'team1_score': match['team1_score'],
                 'team2_score': match['team2_score'],
                 'winner': match['winner__name'],
-            })
+            }
 
-        return JsonResponse({'matches': data}, status=200)
+        upcoming_matches = [format_match(match) for match in upcoming_matches]
+        completed_matches = [format_match(match) for match in completed_matches]
 
+        return JsonResponse({'upcoming_matches': upcoming_matches, 'completed_matches': completed_matches}, status=200)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+
+
 
 from decimal import Decimal
 import random
@@ -446,10 +464,20 @@ from .models import Match, Bet
 
 from django.db.models import F
 
+from datetime import datetime
+
 @csrf_exempt
 def simulate_matches(request):
     try:
-        matches = Match.objects.all()  # Fetch all matches
+        # Get today's date without the time component
+        today = datetime.now().date()
+
+        # Fetch matches that are scheduled for today and not yet completed
+        matches = Match.objects.filter(timestamp__date=today, completed=False)
+
+        if not matches.exists():
+            return JsonResponse({'message': 'No matches scheduled for today or all matches are already completed.'}, status=200)
+
         for match in matches:
             # Generate random scores for the teams
             team1_score = random.randint(0, 5)
@@ -461,17 +489,16 @@ def simulate_matches(request):
             if team1_score > team2_score:
                 match.winner = match.team1
                 match.team1.points = F('points') + 10  # Add 10 points to the winning team
-                match.team2.points = F('points')  # No points for the losing team
             elif team2_score > team1_score:
                 match.winner = match.team2
                 match.team2.points = F('points') + 10
-                match.team1.points = F('points')
             else:
                 match.winner = None  # Draw scenario, no points awarded
 
+            match.completed = True  # Mark match as completed
             match.save()
-            match.team1.save()
-            match.team2.save()
+            match.team1.save(update_fields=['points'])  # Save updated points for team1
+            match.team2.save(update_fields=['points'])  # Save updated points for team2
 
             # Update bets associated with the match (game field)
             bets = Bet.objects.filter(game=match)  # Use game instead of match
@@ -493,9 +520,10 @@ def simulate_matches(request):
         # Recalculate team rankings after all matches
         update_team_rankings()
 
-        return JsonResponse({'message': 'Matches simulated successfully'}, status=200)
+        return JsonResponse({'message': 'Today\'s matches simulated successfully'}, status=200)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
 
 
 def update_team_rankings():

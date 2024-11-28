@@ -36,13 +36,13 @@ function Dashboard() {
       setLoading(true);
       try {
         const response = await axios.get('http://127.0.0.1:8000/api/matches/'); // Fetch matches from backend
-        const formattedGames = response.data.matches.map((match) => ({
+        const upcomingMatches = response.data.upcoming_matches.map((match) => ({
           id: match.id,
           team1: match.team1,
           team2: match.team2,
           odds: { team1: match.team1_odds, team2: match.team2_odds },
         }));
-        setGames(formattedGames);
+        setGames(upcomingMatches); // Only set upcoming matches for betting
       } catch (error) {
         console.error('Error fetching games data:', error.message);
       } finally {
