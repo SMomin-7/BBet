@@ -1,0 +1,121 @@
+/* General Styles */
+body {
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+  background-color: #000; /* Black background for a premium look */
+  color: #fff; /* Bright white text for high contrast */
+}
+
+/* Home Container */
+.home-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+/* Hero Section */
+.hero {
+  text-align: center;
+  background: #111; /* Slightly lighter black for distinction */
+  padding: 50px 20px;
+  border-radius: 8px;
+  margin-bottom: 40px;
+  box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1); /* Subtle white shadow for premium feel */
+}
+
+.hero-title {
+  font-size: 3.5em; /* Slightly larger for better emphasis */
+  margin-bottom: 10px;
+  letter-spacing: 2px;
+  color: #fff; /* Bright white for emphasis */
+}
+
+.hero-subtitle {
+  font-size: 1.2em;
+  margin-bottom: 20px;
+  color: #bbb; /* Subtle gray for subtitle */
+}
+
+.cta-button {
+  background-color: #fff; /* White button */
+  color: #000; /* Black text */
+  border: none;
+  padding: 12px 20px;
+  font-size: 1em;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.cta-button:hover {
+  background-color: #333; /* Darker hover effect */
+  color: #fff; /* White text */
+}
+
+/* Features Section */
+.features {
+  text-align: center;
+  max-width: 1200px;
+  width: 100%;
+}
+
+.features h2 {
+  font-size: 2em; /* Reduced size */
+  margin-bottom: 20px;
+  color: #fff; /* Bright white for text */
+  letter-spacing: 1.5px;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+.feature-card {
+  background: #111; /* Dark black card */
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature-card h3 {
+  font-size: 1.3em;
+  margin-bottom: 10px;
+  color: #fff; /* White text for headings */
+}
+
+.feature-card p {
+  font-size: 1em;
+  color: #bbb; /* Subtle gray for descriptions */
+  line-height: 1.5;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(255, 255, 255, 0.2);
+}
+
+/* Footer Section */
+.footer {
+  margin-top: 40px;
+  padding: 20px 0;
+  background: #111; /* Same background as the hero */
+  text-align: center;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1);
+}
+
+.footer p {
+  font-size: 1em;
+  color: #bbb; /* Subtle gray for text */
+}
+
+.footer strong {
+  color: #fff; /* Highlighted name */
+}

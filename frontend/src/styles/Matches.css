@@ -1,45 +1,100 @@
+/* Container for the matches section */
 .matches-container {
   max-width: 800px;
   margin: 50px auto;
-  padding: 20px;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 25px;
+  background-color: #1a1a1a; /* Dark background for premium look */
+  border-radius: 10px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+  color: #ffffff; /* White text for contrast */
 }
 
+/* Main heading */
 h1 {
   text-align: center;
-  margin-bottom: 20px;
-  color: #333;
+  margin-bottom: 25px;
+  color: #00d4ff; /* Bright blue for heading */
+  font-size: 28px;
+  font-family: 'Arial', sans-serif;
+  text-transform: capitalize;
 }
 
+/* Filter container */
 .filter-container {
-  margin-bottom: 20px;
+  margin-bottom: 25px;
   text-align: center;
 }
 
 .filter-container input {
-  width: 60%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  width: 70%;
+  padding: 12px;
+  border: 1px solid #444444; /* Subtle border */
+  border-radius: 6px;
+  background-color: #333333; /* Dark input background */
+  color: #ffffff; /* White text for readability */
+  font-size: 16px;
+  outline: none;
 }
 
+.filter-container input::placeholder {
+  color: #bbbbbb; /* Subtle placeholder color */
+}
+
+.filter-container input:focus {
+  border-color: #00d4ff; /* Highlight input border on focus */
+  background-color: #2a2a2a;
+}
+
+/* Matches list styling */
 .matches-list {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 20px;
 }
 
+/* Individual match card */
 .match-card {
-  padding: 15px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  border: 1px solid #444444; /* Subtle border for card */
+  border-radius: 6px;
+  background-color: #2a2a2a; /* Dark background for card */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+.match-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Match card text */
 .match-card p {
-  margin: 5px 0;
-  color: #555;
+  margin: 8px 0;
+  font-size: 16px;
+  color: #ffffff; /* White text for readability */
+  line-height: 1.5;
+}
+
+.match-card strong {
+  color: #00d4ff; /* Bright blue for team names */
+  font-weight: bold;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+  .matches-container {
+    padding: 20px;
+  }
+
+  h1 {
+    font-size: 24px;
+  }
+
+  filter-container input {
+    width: 90%;
+  }
+
+  .match-card p {
+    font-size: 14px;
+  }
 }

@@ -1,42 +1,75 @@
+/* Container for the entire teams section */
 .teams-container {
   max-width: 900px;
-  margin: 0 auto;
+  margin: 40px auto;
   padding: 20px;
   text-align: center;
+  background-color: #1a1a1a; /* Dark background for a premium look */
+  border-radius: 10px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+  color: #ffffff; /* White text for contrast */
 }
 
+/* Teams table */
 .teams-table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 20px;
+  background-color: #2a2a2a; /* Dark table background for consistency */
+  color: #ffffff; /* White text for contrast */
 }
 
-.teams-table th,
-.teams-table td {
-  border: 1px solid #ddd;
-  padding: 10px;
-  text-align: center;
-}
-
+/* Table headers */
 .teams-table th {
-  background-color: #f4f4f4;
+  background-color: #007bff; /* Bright blue for headers */
+  color: white;
   font-weight: bold;
+  padding: 12px;
+  font-size: 16px;
+  text-transform: uppercase; /* Make headers uppercase for style */
 }
 
-.teams-table tr:nth-child(even) {
-  background-color: #f9f9f9;
-}
-
-.teams-table tr:hover {
-  background-color: #f1f1f1;
-}
-
+/* Table rows */
 .teams-table td {
+  border: 1px solid #444444; /* Subtle border for separation */
+  padding: 12px;
   font-size: 14px;
 }
 
+.teams-table tr:nth-child(even) {
+  background-color: #333333; /* Alternate row background for readability */
+}
+
+.teams-table tr:nth-child(odd) {
+  background-color: #2a2a2a; /* Default row background */
+}
+
+.teams-table tr:hover {
+  background-color: #444444; /* Highlight row on hover */
+}
+
+/* Main heading */
 h1 {
-  font-size: 24px;
+  font-size: 28px;
   margin-bottom: 20px;
-  color: #333;
+  color: #00d4ff; /* Bright blue heading for premium look */
+  font-family: 'Arial', sans-serif;
+  text-transform: capitalize;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+  .teams-container {
+    padding: 15px;
+  }
+
+  .teams-table th,
+  .teams-table td {
+    font-size: 12px;
+    padding: 8px;
+  }
+
+  h1 {
+    font-size: 24px;
+  }
 }
