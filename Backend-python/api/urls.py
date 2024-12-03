@@ -3,6 +3,7 @@ from django.urls import path
 from .views import signup, login_view,get_user_data,update_balance_and_place_bet,get_leaderboard# Import both views
 from .views import leaderboard,import_leaderboard,sync_leaderboard,get_teams,generate_matches,get_matches
 from .views import simulate_matches
+from api.views import get_players_stats
 
 urlpatterns = [
     path('signup/', signup, name='signup'),
@@ -16,5 +17,6 @@ urlpatterns = [
     path('generate-matches/', views.generate_matches, name='generate_matches'),
     path('matches/', views.get_matches, name='get_matches'),
     path('simulate-matches/', simulate_matches, name='simulate_matches'),
+    path('players-stats/', get_players_stats, name='get_players_stats'),
 
 ]

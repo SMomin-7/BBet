@@ -544,5 +544,33 @@ def update_team_rankings():
             team.save()
     except Exception as e:
         print(f"Error updating team rankings: {e}")
+        
+# In views.py
+from django.http import JsonResponse
+from api.models import Player
+
+def get_players_stats(request):
+    try:
+        # Fetch all players with related team data
+        players = Player.objects.select_related('team').all()
+        data = [
+            {
+                "player_Id": str(player.player_id),
+                "f_name": player.first_name,
+                "l_name": player.last_name,
+                "team_name": player.team.name,
+                "Contract_Length": player.contract_length,
+                "overall_rating": player.overall_rating,
+                "Shots": player.shots,
+                "Assists": player.assists,
+                "Points": player.points,
+                "ranking": player.ranking,
+            }
+            for player in players
+        ]
+        return JsonResponse({"players": data}, status=200)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
 
 

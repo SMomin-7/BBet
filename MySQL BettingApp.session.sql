@@ -25,6 +25,11 @@ SELECT * FROM api_team ORDER BY ranking ASC;
 DESCRIBE api_match;
 SELECT * FROM api_match;
 
+DESCRIBE api_player;
+SELECT * FROM api_player ORDER BY ranking ASC;
+
+
+
 
 
 

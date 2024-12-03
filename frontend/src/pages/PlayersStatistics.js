@@ -6,38 +6,19 @@ function PlayersStatistics() {
   const [loading, setLoading] = useState(true); // Loading state
   const [searchQuery, setSearchQuery] = useState(''); // State for search query
 
-  // Simulate fetching data from the backend
+  // Fetching data from the backend
   useEffect(() => {
     const fetchPlayersStats = async () => {
       setLoading(true);
-      setTimeout(() => {
-        const mockData = [
-          {
-            player_Id: 1,
-            f_name: 'John',
-            l_name: 'Doe',
-            team_name: 'Team A',
-            Contract_Length: 2,
-            overall_rating: 85,
-            Shots: 120,
-            Assists: 40,
-            Points: 200,
-          },
-          {
-            player_Id: 2,
-            f_name: 'Jane',
-            l_name: 'Smith',
-            team_name: 'Team B',
-            Contract_Length: 3,
-            overall_rating: 78,
-            Shots: 95,
-            Assists: 25,
-            Points: 150,
-          },
-        ];
-        setPlayersStats(mockData);
+      try {
+        const response = await fetch('http://127.0.0.1:8000/api/players-stats/'); // API endpoint
+        const data = await response.json(); // Parse JSON response
+        setPlayersStats(data.players); // Update state with players data
+      } catch (error) {
+        console.error('Error fetching player statistics:', error);
+      } finally {
         setLoading(false);
-      }, 1000); // Simulate 1-second delay
+      }
     };
 
     fetchPlayersStats();
@@ -70,7 +51,6 @@ function PlayersStatistics() {
         <table className="players-stats-table">
           <thead>
             <tr>
-              <th>Player ID</th>
               <th>First Name</th>
               <th>Last Name</th>
               <th>Team</th>
@@ -79,12 +59,12 @@ function PlayersStatistics() {
               <th>Shots</th>
               <th>Assists</th>
               <th>Points</th>
+              <th>Ranking</th>
             </tr>
           </thead>
           <tbody>
-            {filteredPlayers.map((player) => (
-              <tr key={player.player_Id}>
-                <td>{player.player_Id}</td>
+            {filteredPlayers.map((player, index) => (
+              <tr key={index}>
                 <td>{player.f_name}</td>
                 <td>{player.l_name}</td>
                 <td>{player.team_name}</td>
@@ -93,6 +73,7 @@ function PlayersStatistics() {
                 <td>{player.Shots}</td>
                 <td>{player.Assists}</td>
                 <td>{player.Points}</td>
+                <td>{player.ranking}</td>
               </tr>
             ))}
           </tbody>

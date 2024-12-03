@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.validators import MinValueValidator
 from decimal import Decimal
+import uuid
 
 class CustomUser(models.Model):
     user_id = models.AutoField(primary_key=True)
@@ -68,3 +69,17 @@ class Match(models.Model):
         return f"{self.team1.name} vs {self.team2.name}"
 
 
+class Player(models.Model):
+    player_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)  # Unique Player ID
+    ranking = models.IntegerField(default=0)  # Dynamic ranking
+    first_name = models.CharField(max_length=255)
+    last_name = models.CharField(max_length=255)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='players')  # Relationship to Team
+    contract_length = models.IntegerField(default=1)  # Contract length in years
+    overall_rating = models.IntegerField(default=0)  # Player's overall rating
+    shots = models.IntegerField(default=0)  # Total shots
+    assists = models.IntegerField(default=0)  # Total assists
+    points = models.IntegerField(default=0)  # Total points
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name} ({self.team.name})"
