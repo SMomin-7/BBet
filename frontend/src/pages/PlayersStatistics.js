@@ -68,7 +68,7 @@ function PlayersStatistics() {
           value={sortOption}
           onChange={(e) => setSortOption(e.target.value)}
         >
-          <option value="ranking">Ranking (Low to High)</option>
+          <option value="ranking">Ranking (High to Low)</option>
           <option value="first_name">First Name (A-Z)</option>
           <option value="contract_length">Contract Length</option>
         </select>
