@@ -45,6 +45,36 @@ h1 {
   background-color: #333333; /* Slightly lighter background on focus */
 }
 
+/* Sorting dropdown container */
+.sorting-container {
+  text-align: center;
+  margin-bottom: 25px;
+  width: 50%; /* Reduced width for compactness */
+  margin: 0 auto; /* Center the container */
+}
+
+.sorting-container label {
+  font-size: 16px;
+  font-weight: bold;
+  color: #ffffff; /* White text for labels */
+  margin-right: 10px;
+}
+
+.sorting-container select {
+  padding: 8px; /* Reduced padding for a sleeker look */
+  font-size: 15px; /* Adjusted font size */
+  border: 1px solid #444444; /* Subtle border for dropdown */
+  border-radius: 6px;
+  background-color: #2a2a2a; /* Dark background for dropdown */
+  color: #ffffff; /* White text for readability */
+  outline: none;
+  cursor: pointer;
+}
+
+.sorting-container select:focus {
+  border-color: #00d4ff; /* Highlight border on focus */
+}
+
 /* Table styling */
 .players-stats-table {
   width: 100%;
@@ -100,6 +130,20 @@ p {
 
   .search-bar input {
     width: 90%;
+  }
+
+  .sorting-container {
+    width: 80%; /* Further reduce width for mobile view */
+    margin-bottom: 20px;
+  }
+
+  .sorting-container label {
+    font-size: 14px;
+  }
+
+  .sorting-container select {
+    font-size: 14px;
+    padding: 8px;
   }
 
   .players-stats-table th,

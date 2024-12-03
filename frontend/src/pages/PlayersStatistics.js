@@ -5,6 +5,7 @@ function PlayersStatistics() {
   const [playersStats, setPlayersStats] = useState([]); // State for players and stats data
   const [loading, setLoading] = useState(true); // Loading state
   const [searchQuery, setSearchQuery] = useState(''); // State for search query
+  const [sortOption, setSortOption] = useState('ranking'); // Default sorting option
 
   // Fetching data from the backend
   useEffect(() => {
@@ -31,6 +32,20 @@ function PlayersStatistics() {
       player.l_name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Sort players based on the selected sort option
+  const sortedPlayers = [...filteredPlayers].sort((a, b) => {
+    switch (sortOption) {
+      case 'ranking':
+        return a.ranking - b.ranking; // Low to high ranking
+      case 'first_name':
+        return a.f_name.localeCompare(b.f_name); // Alphabetical by first name
+      case 'contract_length':
+        return a.Contract_Length - b.Contract_Length; // Contract length
+      default:
+        return 0;
+    }
+  });
+
   return (
     <div className="players-stats-container">
       <h1>Players and Statistics</h1>
@@ -45,9 +60,23 @@ function PlayersStatistics() {
         />
       </div>
 
+      {/* Sorting dropdown */}
+      <div className="sorting-container">
+        <label htmlFor="sort">Sort by: </label>
+        <select
+          id="sort"
+          value={sortOption}
+          onChange={(e) => setSortOption(e.target.value)}
+        >
+          <option value="ranking">Ranking (Low to High)</option>
+          <option value="first_name">First Name (A-Z)</option>
+          <option value="contract_length">Contract Length</option>
+        </select>
+      </div>
+
       {loading ? (
         <p>Loading players and statistics...</p>
-      ) : filteredPlayers.length > 0 ? (
+      ) : sortedPlayers.length > 0 ? (
         <table className="players-stats-table">
           <thead>
             <tr>
@@ -63,7 +92,7 @@ function PlayersStatistics() {
             </tr>
           </thead>
           <tbody>
-            {filteredPlayers.map((player, index) => (
+            {sortedPlayers.map((player, index) => (
               <tr key={index}>
                 <td>{player.f_name}</td>
                 <td>{player.l_name}</td>
