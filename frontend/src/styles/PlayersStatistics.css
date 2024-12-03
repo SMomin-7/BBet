@@ -118,6 +118,46 @@ p {
   margin-top: 20px;
 }
 
+/* Refresh button styling */
+.refresh-button {
+  display: inline-block;
+  padding: 8px 12px; /* Reduced padding for smaller size */
+  font-size: 14px; /* Adjusted font size */
+  font-weight: bold;
+  color: #ffffff; /* White text for contrast */
+  background-color: #00d4ff; /* Bright blue background to match the theme */
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  margin-bottom: 20px; /* Space below the button */
+}
+
+.refresh-button:hover {
+  background-color: #009ec3; /* Slightly darker blue on hover */
+  transform: translateY(-2px); /* Subtle lift effect on hover */
+}
+
+.refresh-button:focus {
+  outline: none;
+  box-shadow: 0 0 5px #00d4ff; /* Glow effect on focus */
+}
+
+/* Place the refresh button centered under the search bar */
+.refresh-container {
+  text-align: center;
+  margin-top: 10px; /* Space above the refresh button */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .refresh-button {
+    padding: 6px 10px; /* Further reduced padding for mobile view */
+    font-size: 12px; /* Smaller font size for mobile */
+  }
+}
+
+
 /* Responsive design */
 @media (max-width: 768px) {
   .players-stats-container {
