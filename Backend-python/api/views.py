@@ -295,8 +295,10 @@ def get_teams(request):
 
 
 import random
-from datetime import datetime
-from django.utils.timezone import now
+from datetime import datetime, timedelta
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from api.models import Team, Match
 
 STADIUMS = [
     "BC Place",
@@ -308,7 +310,6 @@ STADIUMS = [
     "TD Place Stadium",
     "Mosaic Stadium"
 ]
-
 
 @csrf_exempt
 def generate_matches(request):
@@ -338,14 +339,25 @@ def generate_matches(request):
             team1_odds = round(random.uniform(1.5, 3.0), 2)
             team2_odds = round(random.uniform(1.5, 3.0), 2)
 
-            # Assign a stadium
-            stadium = random.choice(STADIUMS)
+            # Assign a stadium ensuring no stadium is reused on the same day
+            available_stadiums = [
+                stadium for stadium in STADIUMS
+                if not Match.objects.filter(timestamp__date=start_time.date(), stadium=stadium).exists()
+            ]
+            if not available_stadiums:
+                # Move to the next day if no stadiums are available
+                start_time += timedelta(days=1)
+                start_time = start_time.replace(hour=12, minute=0, second=0, microsecond=0)
+                match_count = 0
+                available_stadiums = STADIUMS  # Reset stadium availability for the new day
 
-            # Check for time conflicts in the same stadium
-            while Match.objects.filter(timestamp=start_time, stadium=stadium, completed=False).exists():
+            stadium = random.choice(available_stadiums)
+
+            # Ensure no matches overlap in time and stadium
+            while Match.objects.filter(timestamp=start_time, stadium=stadium).exists():
                 start_time += time_gap  # Increment start time to avoid conflict
 
-            # Check if match already exists
+            # Create or update the match
             match, created = Match.objects.get_or_create(
                 team1=team1,
                 team2=team2,
@@ -391,6 +403,7 @@ def generate_matches(request):
 
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
 
 
 
