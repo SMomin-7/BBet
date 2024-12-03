@@ -8,21 +8,21 @@ function PlayersStatistics() {
   const [sortOption, setSortOption] = useState('ranking'); // Default sorting option
 
   // Fetching data from the backend
-  useEffect(() => {
-    const fetchPlayersStats = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch('http://127.0.0.1:8000/api/players-stats/'); // API endpoint
-        const data = await response.json(); // Parse JSON response
-        setPlayersStats(data.players); // Update state with players data
-      } catch (error) {
-        console.error('Error fetching player statistics:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchPlayersStats = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('http://127.0.0.1:8000/api/players-stats/'); // API endpoint
+      const data = await response.json(); // Parse JSON response
+      setPlayersStats(data.players); // Update state with players data
+    } catch (error) {
+      console.error('Error fetching player statistics:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchPlayersStats();
+  useEffect(() => {
+    fetchPlayersStats(); // Fetch player stats on component mount
   }, []);
 
   // Filter players based on the search query
@@ -68,10 +68,17 @@ function PlayersStatistics() {
           value={sortOption}
           onChange={(e) => setSortOption(e.target.value)}
         >
-          <option value="ranking">Ranking (High to Low)</option>
+          <option value="ranking">Ranking (Low to High)</option>
           <option value="first_name">First Name (A-Z)</option>
           <option value="contract_length">Contract Length</option>
         </select>
+      </div>
+
+      {/* Refresh Button */}
+      <div className="refresh-container">
+        <button className="refresh-button" onClick={fetchPlayersStats}>
+          Refresh Stats
+        </button>
       </div>
 
       {loading ? (

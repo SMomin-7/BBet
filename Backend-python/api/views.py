@@ -507,6 +507,18 @@ def simulate_matches(request):
             match.team1.save(update_fields=['points'])  # Save updated points for team1
             match.team2.save(update_fields=['points'])  # Save updated points for team2
 
+            # Update player stats for both teams
+            def update_player_stats(team, team_score):
+                players = Player.objects.filter(team=team)
+                for player in players:
+                    player.shots = F('shots') + random.randint(5, 15)  # Random shots per match
+                    player.assists = F('assists') + random.randint(1, 5)  # Random assists per match
+                    player.points = F('points') + team_score // players.count()  # Distribute team points among players
+                    player.save()
+
+            update_player_stats(match.team1, team1_score)
+            update_player_stats(match.team2, team2_score)
+
             # Update bets associated with the match (game field)
             bets = Bet.objects.filter(game=match)  # Use game instead of match
             for bet in bets:
@@ -527,9 +539,23 @@ def simulate_matches(request):
         # Recalculate team rankings after all matches
         update_team_rankings()
 
+        # Recalculate player rankings
+        recalculate_player_rankings()
+
         return JsonResponse({'message': 'Today\'s matches simulated successfully'}, status=200)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+
+def recalculate_player_rankings():
+    """
+    Recalculate player rankings based on updated stats (e.g., points, assists, and shots).
+    """
+    players = Player.objects.all().order_by('-points', '-assists', '-shots', '-overall_rating')
+    for rank, player in enumerate(players, start=1):
+        player.ranking = rank
+        player.save()
+
 
 
 
