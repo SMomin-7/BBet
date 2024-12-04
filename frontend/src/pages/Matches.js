@@ -80,7 +80,7 @@ function Matches() {
             </div>
           ) : (
             <p className="no-matches-message">
-              No upcoming matches found. Current State: {JSON.stringify(upcomingMatches)}
+              No upcoming matches found.
             </p>
           )}
 
@@ -107,7 +107,7 @@ function Matches() {
             </div>
           ) : (
             <p className="no-matches-message">
-              No completed matches found. Current State: {JSON.stringify(completedMatches)}
+              No completed matches found.
             </p>
           )}
         </>
