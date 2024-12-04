@@ -79,6 +79,12 @@ h1 {
   color: #00d4ff; /* Bright blue for team names */
   font-weight: bold;
 }
+.winner {
+  font-weight: bold;
+  color: #39ff14; /* Neon green */
+  text-shadow: 0 0 5px #39ff14, 0 0 10px #39ff14, 0 0 20px #39ff14;
+}
+
 
 /* Responsive design for smaller screens */
 @media (max-width: 768px) {

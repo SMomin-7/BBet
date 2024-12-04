@@ -94,7 +94,11 @@ function Matches() {
                   </p>
                   <p className="match-details">Date: {match.date}</p>
                   <p className="match-details">Stadium: {match.stadium}</p>
-                  <p className="match-details">Winner: {match.winner || 'Draw'}</p>
+                  <p
+                    className={`match-details ${match.winner ? 'winner' : ''}`}
+                  >
+                    Winner: {match.winner || 'Draw'}
+                  </p>
                   <p className="match-details">
                     Scores: {match.team1_score} - {match.team2_score}
                   </p>
