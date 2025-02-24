@@ -54,7 +54,7 @@ cd BBet
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'bettingapp',  
         'USER': 'root',        
-        'PASSWORD': 'Shaims786@',  
+        'PASSWORD': 'Password',  
         'HOST': 'localhost',   
         'PORT': '3306',        
     }
