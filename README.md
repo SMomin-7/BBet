@@ -1,4 +1,4 @@
-```markdown
+markdown
 # BBet: Basketball Betting Application
 
 Welcome to BBet, a web-based application for placing bets on basketball games, viewing player and team statistics, and exploring leaderboards. Follow these instructions to set up and run the project for grading purposes.
